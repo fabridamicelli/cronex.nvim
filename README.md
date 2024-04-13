@@ -1,3 +1,5 @@
+If you find this work useful, don't forget to give it a GitHub ⭐ to help others find and trust it!
+
 # cronex.nvim
 Human-readable cron expressions in Neovim.
 
@@ -12,7 +14,6 @@ Cronex is the interface that allows the Neovim user to integrate and customize t
 There are several implementations of those out there (see below).
 You can use any of those with Cronex.
 
-TODO: image of flow diagram
 
 ## Getting Started
 ### Dependencies
@@ -24,26 +25,6 @@ The default is [cronstrue](https://www.npmjs.com/package/cronstrue), which is th
 That will use the `cronstrue` library under the hood to generate the explanations.
 
 ### Installation
-Using [vim-plug](https://github.com/junegunn/vim-plug)
-
-```viml
-Plug 'fabridamicelli/cronex.nvim'
-```
-
-Using [dein](https://github.com/Shougo/dein.vim)
-
-```viml
-call dein#add('fabridamicelli/cronex.nvim')
-```
-
-Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
-
-```lua
-use {
-  'fabridamicelli/cronex.nvim'
-}
-```
-
 Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
@@ -51,11 +32,6 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
     {
     'fabridamicelli/cronex.nvim',
     opts = {}, 
-    -- Or
-    -- config = function()
-    --     require("cronex").setup({}) 
-    --     etc, etc.
-    --end
     }
 -- plugins/cronex.lua:
 return {
@@ -64,7 +40,6 @@ return {
     -- Or
     -- config = function()
     --     require("cronex").setup({}) 
-    --     etc, etc.
     --end
     }
 ```
@@ -74,9 +49,6 @@ return {
 Calling setup makes the explainer available and set explanations when leaving insert mode.  
 Entering insert mode clears the explanations.
 Cronex can be also disabled/enabled on any file (see Commands).
-
-TODO: screencast
-
 
 ### Commands
 The setup will make the following commands available:
@@ -311,7 +283,7 @@ Having said that, a few potential ideas to improve performance:
 - Implementing the explainer in pure lua to avoid external calls
 
 The current `extract` logic is a bit rudimentary (partly because regex in lua are a bit trickier than normal (at least for me).
-Any improvement along those lines is more than welcome:)
+Any improvement along those lines is more than welcome).
 
 
 ## Troubleshooting
