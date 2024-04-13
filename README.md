@@ -4,7 +4,7 @@ If you find this work useful, don't forget to give it a GitHub ⭐ to help other
 Human-readable cron expressions in Neovim.
 
 ## What is Cronex
-Cronex is a Neovim plugin that allows you to integrate human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron), rendered as [diagnostic hints](https://neovim.io/doc/user/diagnostic.html) (i.e., just like your LSP does):
+Cronex is a Neovim plugin that allows you to integrate human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron), rendered as [diagnostic hints](https://neovim.io/doc/user/diagnostic.html):
 
 <img src='./images/screencast-usage.gif' width='800'>
 
@@ -32,15 +32,13 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
     'fabridamicelli/cronex.nvim',
     opts = {}, 
     }
+
+-- Or
 -- plugins/cronex.lua:
 return {
     'fabridamicelli/cronex.nvim',
     opts = {},
-    -- Or
-    -- config = function()
-    --     require("cronex").setup({}) 
-    --end
-    }
+}
 ```
 
 
