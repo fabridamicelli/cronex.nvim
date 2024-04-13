@@ -14,7 +14,6 @@ Cronex is the interface that allows the Neovim user to integrate and customize t
 There are several implementations of those out there (see below).
 You can use any of those with Cronex.
 
-
 ## Getting Started
 ### Dependencies
 You will need a cron expression explainer installed.
