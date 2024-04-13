@@ -81,10 +81,10 @@ TODO: screencast
 ### Commands
 The setup will make the following commands available:
 
-|Command                | Description                           |
-|-----------------------|---------------------------------------|  
-|`CronExplainedDisable` | Turn off the explanations permanently |
-|`CronExplainedEnable`  | Turn on the explanations again        |
+|Command                | Description                                                    |
+|-----------------------|----------------------------------------------------------------|  
+|`CronExplainedDisable` | Turn off the explanations permanently                          |
+|`CronExplainedEnable`  | Turn on the explanations again (regardless of filetype)        |
 
 
 ## Customization
@@ -133,8 +133,8 @@ require("cronex").setup({
 ```
 
 ### Extractor
-Logic of the default extractor can be found here in `/cronex/regex.lua`.  
-Default extractor searches for at most 1 expression per line of length 7, 6 or 5.  
+Logic of the default extractor can be found here in `/cronex/cron_from_line.lua`.  
+Default extractor searches for at most 1 expression per line of length 7, 6 or 5 (in that order).  
 But Cronex allows the user to hook in and swap this by any arbitrary logic.  
 
 The extractor has 2 parts: `cron_from_line` and `extract`, both are functions.  
@@ -177,7 +177,7 @@ Under the hood, `cron_from_line` will be passed to `extract` like so:
 ```lua
 extract(cron_from_line)
 ```
-This allows you to use the default `extract` function but with a custom `cron_from_line` function.
+This allows you to plug a custom function to extract cron from line and still use the default `extract` function
 
 You may even just set `cron_from_line` to `nil` and use the `extract` function to send the whole buffer to another program from which you capture the output.
 All that matters is that `extract` returns the table with pairs (`line_number`, `cron_expression`).
@@ -188,7 +188,7 @@ For example:
         extractor = {
             cron_from_line = nil,
             extract = function(_)
-                local t = {}   --TODO: check that this works
+                local t = {}
                 local out = send_buffer_to_external_program_and_collect_crons()
                 for lnum, cron in out do
                     t[lnum] = cron
@@ -310,7 +310,7 @@ Having said that, a few potential ideas to improve performance:
 - Accelerating extraction, for example, by using `ripgrep` to extract all crons in one shot (instead of iterating over lines)
 - Implementing the explainer in pure lua to avoid external calls
 
-The current `extract` logic is a bit rudimentary (partly because regex in lua are a bit trickier than normal, at least for me).
+The current `extract` logic is a bit rudimentary (partly because regex in lua are a bit trickier than normal (at least for me).
 Any improvement along those lines is more than welcome:)
 
 

@@ -9,7 +9,7 @@ local assert_all_eq = function(inputs, expected)
 end
 
 
-describe("regex.cron_from_line - Invalid cron:", function()
+describe("cron_from_line.cron_from_line - Invalid cron:", function()
     it("empty lines are nil", function()
         local lines = {
             '""',
@@ -70,7 +70,7 @@ describe("regex.cron_from_line - Invalid cron:", function()
 end)
 
 
-describe("regex.cron_from_line - Valid cron:", function()
+describe("cron_from_line.cron_from_line - Valid cron:", function()
     it("extract pure cron", function()
         -- pairs (input, expected)
         local items = {
