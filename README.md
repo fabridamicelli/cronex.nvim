@@ -4,7 +4,7 @@ Human-readable cron expressions in Neovim.
 ## What is Cronex
 Cronex is a Neovim plugin that allows you to integrate human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron), rendered as [diagnostic hints](https://neovim.io/doc/user/diagnostic.html) (i.e., just like your LSP does):
 
-TODO: screencast
+<img src='./images/screencast-usage.gif' width='800'>
 
 This plugin is **not** a cron expression parser/checker by itself.
 Cronex is the interface that allows the Neovim user to integrate and customize the functionality of external cron expression explainers into the editor in a flexible fashion.
