@@ -1,16 +1,15 @@
 If you find this work useful, don't forget to give it a GitHub ⭐ to help others find and trust it!
 
 # cronex.nvim
-Human-readable cron expressions in Neovim.
+Human-readable cron expressions in Neovim
 
 ## What is Cronex
-Cronex is a Neovim plugin that allows you to integrate human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron), rendered as [diagnostic hints](https://neovim.io/doc/user/diagnostic.html):
+Cronex is a Neovim plugin to render in-line, human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron):
 
 <img src='./images/screencast-usage.gif' width='800'>
 
 This plugin is **not** a cron expression parser/checker by itself.
-Cronex is the interface that allows the Neovim user to integrate and customize the functionality of external cron expression explainers into the editor in a flexible fashion.
-
+Cronex is rather the "client" that allows the Neovim user to integrate and customize "servers" (cron expression "explainers") in a flexible fashion.
 There are several implementations of those out there (see below).
 You can use any of those with Cronex.
 
