@@ -1,25 +1,3 @@
--- TODO:
---  cronex
---  DebugMode: pass line as warning, even if no cron detected
---  line filter func
---  cronexp regex func
---  backend cronexp parsing func/cmd (timeout)
---  sring post-processing func
---  allow CronExplainedDisable,CronExplained!
---  document backends with links
---  config.file_patternss/filefile_patternss?
---  TESTS!
---  - config passing (modify defaults)
---  - filefile_patternss
---  - regex
---  - enable/disable
---  - marks
---  - engine
---  replicate extract test of other libraries (cronex, hcron, etc)
---  explain this plugin is the "client side" (server is the explainer)
---  rename Cronex cron.nvim?
---  scrape cron expressions from github?
-
 local api = vim.api
 local ns = api.nvim_create_namespace("cronex")
 
