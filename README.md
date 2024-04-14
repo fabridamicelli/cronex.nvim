@@ -1,3 +1,5 @@
+[![CI](https://github.com/fabridamicelli/cronex.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/fabridamicelli/cronex.nvim/actions/workflows/ci.yml)
+
 If you find this work useful, don't forget to give it a GitHub ⭐ to help others find and trust it!
 
 # cronex.nvim
