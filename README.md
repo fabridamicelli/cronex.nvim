@@ -269,18 +269,16 @@ That will transform it like this:
 ```
 
 ## Limitations
+The current `extract` logic is a bit rudimentary (partly because regex in lua are a bit trickier than normal (at least for me).
+Any improvement along those lines is more than welcome.
+
 The call to the explainer is a blocking operation.
-Because the current implementation recalculates all explanations on each `InsertLeave` event, that might result in a little lag if there are many expressions in the buffer (of courser, depending on how long the explainer program takes to generate the explanation)
 While testing I found that to be a problem only if there are unrealistically many cron expressions in the buffer.  
 Also, the Go implementation of the explainer is so fast that even having hundreds of expressions in a buffer everything runs decently fast.  
 In short, my guess is that almost no user (if any at all) will notice this.
 Having said that, a few potential ideas to improve performance:
 - Accelerating extraction, for example, by using `ripgrep` to extract all crons in one shot (instead of iterating over lines)
 - Implementing the explainer in pure lua to avoid external calls
-
-The current `extract` logic is a bit rudimentary (partly because regex in lua are a bit trickier than normal (at least for me).
-Any improvement along those lines is more than welcome).
-
 
 ## Troubleshooting
 - Default behaviour considers only 1 cron expression is per line.
