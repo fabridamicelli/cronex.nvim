@@ -245,11 +245,11 @@ Here's a (non-exhaustive) overview cron explainers out there:
 
 ### format
 We might want to modify the output from the third-party explainer libraries.
-For example, the `cronstrue` library shows the input as well in the output like so:
+For example, some explainers show the input as well in the output like so:
 ```
 "* * * * *": Every minute
 ```
-The default format (`all_after_colon`) transforms the output to just show "Every minute".  
+In that case, you could use the function `require("cronex.format").all_after_colon`) to transform the output to just show "Every minute".  
 But the user can do any other transformation by defining a lua function, for example:
 ```lua
 {
