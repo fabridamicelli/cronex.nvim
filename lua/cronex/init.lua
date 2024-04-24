@@ -36,13 +36,13 @@ M.enable = function()
 	M.augroup = api.nvim_create_augroup("cronex", { clear = true })
 	api.nvim_create_autocmd({ "BufEnter", "InsertLeave", "TextChanged" }, {
 		group = M.augroup,
-		pattern = M.config.file_patterns,
+		buffer = 0,
 		callback = require("cronex").set_explanations,
 	})
 
 	api.nvim_create_autocmd({ "InsertEnter" }, {
 		group = M.augroup,
-		pattern = M.config.file_patterns,
+		buffer = 0,
 		callback = require("cronex").hide_explanations,
 	})
 	require("cronex").set_explanations()
@@ -68,7 +68,11 @@ M.setup = function(opts)
 		require("cronex").disable,
 		{ desc = "Disable explanations of cron expressions" })
 
-	M.enable()
+	api.nvim_create_autocmd("BufEnter", {
+		group = M.augroup,
+		pattern = M.config.file_patterns,
+		callback = M.enable,
+	})
 end
 
 return M
