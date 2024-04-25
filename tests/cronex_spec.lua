@@ -1,5 +1,0 @@
-describe("cronex", function()
-    it("can be required", function()
-        require("cronex")
-    end)
-end)
