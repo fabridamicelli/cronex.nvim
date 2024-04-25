@@ -3,7 +3,7 @@ name: Bump version and release
 on:
   push:
     tags:
-      - '[0-9].[0-9]+.[0-9]+**'
+      - "**"
 
 jobs:
   bump-version:
