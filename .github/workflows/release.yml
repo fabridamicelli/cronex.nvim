@@ -3,7 +3,7 @@ name: Bump version and release
 on:
   push:
     tags:
-      - "**"
+      - "*"
 
 jobs:
   bump-version:
