@@ -1,44 +1,87 @@
-describe("api: ", function()
-    it("can be required", function()
+local check_autocmds = function(autocmds)
+    -- Make sure the callbacks of the autocmds are correct
+    for _, cmd in pairs(autocmds) do
+        assert.True(vim.tbl_contains({ "InsertEnter", "InsertLeave", "TextChanged" }, cmd.event))
+
+        if cmd.event == "InsertLeave" or cmd.event == "TextChanged" then
+            assert.are.equal(cmd.callback, require("cronex").set_explanations)
+        end
+
+        if cmd.event == "InsertEnter" then
+            assert.are.equal(cmd.callback, require("cronex").hide_explanations)
+        end
+    end
+end
+
+
+describe("api - exposed : ", function()
+    it("cronex package can be required", function()
         require("cronex")
     end)
 
-    it("Commands CronExplainedEnable/Disable are made available on setup", function()
-        local cmds = vim.api.nvim_get_commands({})
-        assert.are.same(nil, cmds["CronExplainedEnable"])
-        assert.are.same(nil, cmds["CronExplainedDisable"])
+    it("Setup makes CronExplainedEnable/Disable available", function()
+        local emptycmds = vim.api.nvim_get_commands({})
+        assert.equals(nil, emptycmds["CronExplainedEnable"])
+        assert.equals(nil, emptycmds["CronExplainedDisable"])
 
         require("cronex").setup({})
-        cmds = vim.api.nvim_get_commands({})
+        local cmds = vim.api.nvim_get_commands({})
         assert.are_not.same(nil, cmds["CronExplainedEnable"])
         assert.are_not.same(nil, cmds["CronExplainedDisable"])
     end)
 
-    it("Autocommands are created on enable", function()
+    it("Toggle plugin adds/deletes autocommands", function()
+        -- Start clean
+        local g = vim.api.nvim_create_augroup("cronex", { clear = true })
+        assert.are.same({}, vim.api.nvim_get_autocmds({ group = g }))
+
+        -- Activating plugin should make autocmds available
+        vim.cmd("CronExplainedEnable")
+        local autocmds1 = vim.api.nvim_get_autocmds({ group = g })
+        assert.are_not.same({}, autocmds1)
+        check_autocmds(autocmds1)
+
+
+        -- Deactivating plugin should make autocmds available
+        vim.cmd("CronExplainedDisable")
+        -- Trying to grab a non-existing group (expected behaviour as a result of CronExplainedDisable)
+        -- throws an error, so we just catch that one here
+        assert.has.errors(function() vim.api.nvim_get_autocmds({ group = g }) end, "Invalid 'group': 11")
+
+        -- Re-activating plugin should make commands available again
+        vim.cmd("CronExplainedEnable")
+        local g2 = vim.api.nvim_create_augroup("cronex", { clear = false })
+        local autocmds2 = vim.api.nvim_get_autocmds({ group = g2 })
+        check_autocmds(autocmds2)
+    end)
+end)
+
+describe("api - internals: ", function()
+    it("M.enable() call creates autocommands", function()
         local group = vim.api.nvim_create_augroup("cronex", { clear = true })
-        local autocmds = vim.api.nvim_get_autocmds({ group = group })
-        assert.are.same({}, autocmds)
+        local emptyautocmds = vim.api.nvim_get_autocmds({ group = group })
+        assert.are.same({}, emptyautocmds)
 
         require("cronex").enable()
-        autocmds = vim.api.nvim_get_autocmds({ group = group })
-        assert.are_not.same({}, autocmds)
+        local autocmds = vim.api.nvim_get_autocmds({ group = group })
+        check_autocmds(autocmds)
+    end)
+
+    it("M.disable() call deletes autocommands", function()
+        local group = vim.api.nvim_create_augroup("cronex", { clear = false }) -- clear=false to start with populated group
+        local autocmds = vim.api.nvim_get_autocmds({ group = group })
+        check_autocmds(autocmds)
+
+        require("cronex").disable()
+        local group2 = vim.api.nvim_create_augroup("cronex", { clear = false }) -- keep it false to actually check the state
+        local autocmds2 = vim.api.nvim_get_autocmds({ group = group2 })
+        assert.are.same({}, autocmds2)
     end)
 
     it("Autocommands react to proper events", function()
         require("cronex").enable()
         local group = vim.api.nvim_create_augroup("cronex", { clear = true })
         local autocmds = vim.api.nvim_get_autocmds({ group = group })
-        for _, autocmd in pairs(autocmds) do
-            assert.are.same(true,
-                vim.tbl_contains({ "InsertEnter", "InsertLeave", "TextChanged" }, autocmd.event))
-
-            if autocmd.event == "InsertEnter" then
-                assert.are.same(autocmd.desc, "Hide explanations when entering insert mode")
-            elseif autocmd.event == "InsertLeave" then
-                assert.are.same(autocmd.desc, "Set explanations when leaving insert mode or changing the text")
-            elseif autocmd.event == "TextChanged" then
-                assert.are.same(autocmd.desc, "Set explanations when leaving insert mode or changing the text")
-            end
-        end
+        check_autocmds(autocmds)
     end)
 end)
