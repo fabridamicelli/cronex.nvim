@@ -13,7 +13,6 @@ local check_autocmds = function(autocmds)
     end
 end
 
-
 describe("api - exposed : ", function()
     it("cronex package can be required", function()
         require("cronex")
@@ -46,7 +45,14 @@ describe("api - exposed : ", function()
         vim.cmd("CronExplainedDisable")
         -- Trying to grab a non-existing group (expected behaviour as a result of CronExplainedDisable)
         -- throws an error, so we just catch that one here
-        assert.has.errors(function() vim.api.nvim_get_autocmds({ group = g }) end, "Invalid 'group': 11")
+        assert.has.errors(
+            function()
+                local _, err = pcall(function() vim.api.nvim_get_autocmds({ group = g }) end)
+                if err ~= nil then
+                    local msg = string.match(err, "Invalid 'group':")
+                    error(msg)
+                end
+            end, "Invalid 'group':")
 
         -- Re-activating plugin should make commands available again
         vim.cmd("CronExplainedEnable")
