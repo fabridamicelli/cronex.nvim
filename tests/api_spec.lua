@@ -40,8 +40,7 @@ describe("api - exposed : ", function()
         assert.are_not.same({}, autocmds1)
         check_autocmds(autocmds1)
 
-
-        -- Deactivating plugin should make autocmds available
+        -- Deactivating plugin should remove autocmds
         vim.cmd("CronExplainedDisable")
         -- Trying to grab a non-existing group (expected behaviour as a result of CronExplainedDisable)
         -- throws an error, so we just catch that one here
@@ -59,6 +58,15 @@ describe("api - exposed : ", function()
         local g2 = vim.api.nvim_create_augroup("cronex", { clear = false })
         local autocmds2 = vim.api.nvim_get_autocmds({ group = g2 })
         check_autocmds(autocmds2)
+    end)
+
+    it("Calling CronExplainedDisable when already disabled throws no error", function()
+        assert.has_no.errors(
+            function()
+                vim.cmd("CronExplainedDisable")
+                vim.cmd("CronExplainedDisable")
+                vim.cmd("CronExplainedDisable")
+            end)
     end)
 end)
 

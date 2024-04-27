@@ -53,7 +53,11 @@ end
 
 M.disable = function()
 	vim.diagnostic.reset(ns, 0)
-	api.nvim_del_augroup_by_id(M.augroup)
+	-- pcall: let error (because groud no longer exists) go silent
+	-- on successive calls to CronExplainedDisable
+	pcall(function()
+		api.nvim_del_augroup_by_id(M.augroup)
+	end)
 end
 
 
