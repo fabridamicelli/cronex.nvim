@@ -17,31 +17,24 @@ local defaults = {
 }
 
 M.parse_opts = function(opts)
-	local user = vim.F.if_nil(opts, {})
-
-	-- Set first level keys, otherwise user.* will fail
-	for k, v in pairs(defaults) do
-		user[k] = vim.F.if_nil(user[k], v)
-	end
+	opts = vim.tbl_deep_extend("force", defaults, opts)
 
 	local extract = function()
-		local extract = user.extractor.extract or defaults.extractor.extract
-		local cron_from_line = user.extractor.cron_from_line or defaults.extractor.cron_from_line
-		return extract(cron_from_line)
+		return opts.extractor.extract(opts.extractor.cron_from_line)
 	end
 
 	local explain = function(cron)
-		local cmd = user.explainer.cmd or defaults.explainer.cmd
-		local args = user.explainer.args or defaults.explainer.args
+		local cmd = opts.explainer.cmd
+		local args = opts.explainer.args
 		local full_cmd = vim.tbl_flatten({ cmd, args })
 		return require("cronex.explain").explain(full_cmd, cron)
 	end
 
 	return {
-		file_patterns = user.file_patterns or defaults.file_patterns,
+		file_patterns = opts.file_patterns,
 		extract = extract,
 		explain = explain,
-		format = user.format or defaults.format,
+		format = opts.format,
 	}
 end
 
