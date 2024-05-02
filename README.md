@@ -45,7 +45,9 @@ return {
 Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```viml
+call plug#begin()
 Plug 'fabridamicelli/cronex.nvim'
+call plug#end()
 
 lua <<EOF
 require("cronex").setup({})
