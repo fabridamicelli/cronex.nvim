@@ -42,6 +42,15 @@ return {
 }
 ```
 
+Using [vim-plug](https://github.com/junegunn/vim-plug)
+
+```viml
+Plug 'fabridamicelli/cronex.nvim'
+
+lua <<EOF
+require("cronex").setup({})
+EOF
+```
 
 ## Usage
 Calling setup makes the explainer available and set explanations when leaving insert mode.  
@@ -100,6 +109,18 @@ require("cronex").setup({
         return s
     end
 })
+```
+
+To embed the above configuration code snippet in a `.vim` file
+(for example in `init.vim`),
+wrap it in `lua << EOF code-snippet EOF`:
+
+```lua
+lua << EOF
+require('cronex').setup{
+  -- ...
+}
+EOF
 ```
 
 ### Extractor
