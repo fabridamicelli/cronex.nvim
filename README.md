@@ -8,6 +8,8 @@ Human-readable cron expressions in Neovim
 ## What is Cronex
 Cronex is a Neovim plugin to render in-line, human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron):
 
+[Here's a short introduction video](https://www.youtube.com/live/Se8SKgmCnkc?t=31717s).
+
 <img src='./images/screencast-usage.gif' width='800'>
 
 This plugin is **not** a cron expression parser/checker by itself.
