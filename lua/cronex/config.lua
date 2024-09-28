@@ -13,7 +13,8 @@ local defaults = {
 	},
 	format = function(s)
 		return s
-	end
+	end,
+  highlight = 'DiagnosticVirtualTextInfo',
 }
 
 M.parse_opts = function(opts)
@@ -35,6 +36,7 @@ M.parse_opts = function(opts)
 		extract = extract,
 		explain = explain,
 		format = opts.format,
+    highlight = opts.highlight,
 	}
 end
 
