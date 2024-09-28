@@ -33,7 +33,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 -- init.lua:
     {
     'fabridamicelli/cronex.nvim',
-    opts = {}, 
+    opts = {},
     }
 
 -- Or
@@ -57,7 +57,7 @@ EOF
 ```
 
 ## Usage
-Calling setup makes the explainer available and set explanations when leaving insert mode.  
+Calling setup makes the explainer available and set explanations when leaving insert mode.
 Entering insert mode clears the explanations.
 Cronex can be also disabled/enabled on any file (see Commands).
 
@@ -65,7 +65,7 @@ Cronex can be also disabled/enabled on any file (see Commands).
 The setup will make the following commands available:
 
 |Command                | Description                                                    |
-|-----------------------|----------------------------------------------------------------|  
+|-----------------------|----------------------------------------------------------------|
 |`CronExplainedDisable` | Turn off the explanations permanently                          |
 |`CronExplainedEnable`  | Turn on the explanations again (regardless of filetype)        |
 
@@ -73,7 +73,7 @@ The setup will make the following commands available:
 ## Customization
 
 ### Cronex setup structure
-The plugin consists of three building blocks:  
+The plugin consists of three building blocks:
 
 | Module     | Description                                                               |
 |------------| --------------------------------------------------------------------------|
@@ -88,7 +88,7 @@ require("cronex").setup({
     -- User can manually on any filetype turn explanations on(off) with the commands CronExplainedEnable(CronExplainedDisable)
     file_patterns = { "*.yaml", "*.yml", "*.tf", "*.cfg", "*.config", "*.conf" },
     extractor = { -- Configuration on how to extract cron expressions goes here:
-        -- cron_from_line: Function to search cron expression in line 
+        -- cron_from_line: Function to search cron expression in line
         cron_from_line = require("cronex.cron_from_line").cron_from_line,
         -- extract: Function returning a table with pairs (line_number, cron)
         extract = require("cronex.extract").extract,
@@ -111,7 +111,8 @@ require("cronex").setup({
     -- using require("cronex.format").all_after_colon,
     format = function(s)
         return s
-    end
+    end,
+    highlight = 'DiagnosticVirtualTextInfo',
 })
 ```
 
@@ -128,11 +129,11 @@ EOF
 ```
 
 ### Extractor
-Logic of the default extractor can be found here in `/cronex/cron_from_line.lua`.  
-Default extractor searches for at most 1 expression per line of length 7, 6 or 5 (in that order).  
-But Cronex allows the user to hook in and swap this by any arbitrary logic.  
+Logic of the default extractor can be found here in `/cronex/cron_from_line.lua`.
+Default extractor searches for at most 1 expression per line of length 7, 6 or 5 (in that order).
+But Cronex allows the user to hook in and swap this by any arbitrary logic.
 
-The extractor has 2 parts: `cron_from_line` and `extract`, both are functions.  
+The extractor has 2 parts: `cron_from_line` and `extract`, both are functions.
 You can swap any or both of the two with custom functions, provided you respect the following interfaces:
 
 `cron_from_line`: Function with signature `string -> string|nil`.
@@ -201,14 +202,14 @@ As already mentioned above, Cronex is the integrates the functionality of extern
 There are several implementations of those [out there]().
 
 More generally, it's up to the user which explainer program to use in the background.
-Cronex will call such program via the command (`cmd`), collect the output and pass it along to Neovim.  
+Cronex will call such program via the command (`cmd`), collect the output and pass it along to Neovim.
 This is the default:
 ```lua
 require("cronex").setup({
     explainer = {
         cmd = "cronstrue",
         args = {}
-    } 
+    }
 })
 ```
 For example, you can have `cronstrue` installed in a conda virtualenv.
@@ -222,7 +223,7 @@ But you may not want to install `cronstrue` in every virtualenv, so you can have
     })
 }
 ```
-In fact `cmd` can call anything that knows how to deal with the cron expression. 
+In fact `cmd` can call anything that knows how to deal with the cron expression.
 For example, calling a go program:
 ```lua
 {
@@ -274,7 +275,7 @@ For example, some explainers show the input as well in the output like so:
 ```
 "* * * * *": Every minute
 ```
-In that case, you could use the function `require("cronex.format").all_after_colon`) to transform the output to just show "Every minute".  
+In that case, you could use the function `require("cronex.format").all_after_colon`) to transform the output to just show "Every minute".
 But the user can do any other transformation by defining a lua function, for example:
 ```lua
 {
@@ -300,8 +301,8 @@ The current `extract` logic is a bit rudimentary (partly because regex in lua ar
 Any improvement along those lines is more than welcome.
 
 The call to the explainer is a blocking operation.
-While testing I found that to be a problem only if there are unrealistically many cron expressions in the buffer.  
-Also, the Go implementation of the explainer is so fast that even having hundreds of expressions in a buffer everything runs decently fast.  
+While testing I found that to be a problem only if there are unrealistically many cron expressions in the buffer.
+Also, the Go implementation of the explainer is so fast that even having hundreds of expressions in a buffer everything runs decently fast.
 In short, my guess is that almost no user (if any at all) will notice this.
 Having said that, a few potential ideas to improve performance:
 - Accelerating extraction, for example, by using `ripgrep` to extract all crons in one shot (instead of iterating over lines)

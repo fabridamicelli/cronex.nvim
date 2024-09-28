@@ -4,31 +4,31 @@ local ns = api.nvim_create_namespace("cronex")
 local M = {}
 
 local make_set_explanations = function(config)
+	-- local ns = vim.api.nvim_create_namespace("cronex_explanations")
+
 	local set_explanations = function()
 		local bufnr = 0
-		vim.diagnostic.reset(ns, bufnr) -- Start fresh
+		vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
-		local explanations = {}
 		local crons = config.extract()
 		for lnum, cron in pairs(crons) do
 			local raw_explanation = config.explain(cron)
-			local explanation = config.format(raw_explanation)
-			table.insert(explanations, {
-				bufnr = bufnr,
-				lnum = lnum,
-				col = 0,
-				message = explanation,
-				severity = vim.diagnostic.severity.HINT,
+			local explanation = config.format(raw_explanation):gsub("\r", "") -- Remove ^M
+			vim.api.nvim_buf_set_extmark(bufnr, ns, lnum, 0, {
+				virt_text = {{explanation, config.highlight}},
+				virt_text_pos = "eol",
+				hl_mode = "combine",
 			})
 		end
-		vim.diagnostic.set(ns, bufnr, explanations, {})
 	end
+
 	return set_explanations
 end
 
 
+
 M.hide_explanations = function()
-	vim.diagnostic.reset(ns, 0)
+	vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
 end
 
 
@@ -52,7 +52,7 @@ end
 
 
 M.disable = function()
-	vim.diagnostic.reset(ns, 0)
+	vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
 	-- pcall: let error (because groud no longer exists) go silent
 	-- on successive calls to CronExplainedDisable
 	pcall(function()
