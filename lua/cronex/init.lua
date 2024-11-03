@@ -1,7 +1,9 @@
 local api = vim.api
 local ns = api.nvim_create_namespace("cronex")
 
-local M = {}
+local M = {
+  enabled = false
+}
 
 local make_set_explanations = function(config)
 	-- local ns = vim.api.nvim_create_namespace("cronex_explanations")
@@ -48,6 +50,7 @@ M.enable = function()
 		desc = "Hide explanations when entering insert mode"
 	})
 	require("cronex").set_explanations()
+  M.enabled = true
 end
 
 
@@ -58,6 +61,15 @@ M.disable = function()
 	pcall(function()
 		api.nvim_del_augroup_by_id(M.augroup)
 	end)
+  M.enabled = false
+end
+
+M.toggle = function()
+	if M.enabled then
+		M.disable()
+	else
+		M.enable()
+	end
 end
 
 
@@ -74,10 +86,18 @@ M.setup = function(opts)
 		require("cronex").disable,
 		{ desc = "Disable explanations of cron expressions" })
 
+	api.nvim_create_user_command("CronExplainedToggle",
+		require("cronex").toggle,
+		{ desc = "Toggle explanations of cron expressions" })
+
 	api.nvim_create_autocmd("BufEnter", {
 		group = M.augroup,
 		pattern = M.config.file_patterns,
-		callback = M.enable,
+		callback = function()
+			if M.enabled then
+        M.enable()
+			end
+    end,
 	})
 end
 
