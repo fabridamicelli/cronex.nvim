@@ -1,5 +1,5 @@
 [![CI](https://github.com/fabridamicelli/cronex.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/fabridamicelli/cronex.nvim/actions/workflows/ci.yml)
-![Git Clone Count](https://img.shields.io/badge/Downloads/Month-XX-brightgreen)
+![Git Clone Count](https://img.shields.io/badge/Downloads/Month-128-brightgreen)
 
 If you find this work useful, don't forget to give it a GitHub ⭐ to help others find and trust it!
 
