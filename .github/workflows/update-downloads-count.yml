@@ -1,0 +1,31 @@
+name: Update downloads
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 0 * * *'
+
+jobs:
+   update-releases:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Check out this repo
+         uses: actions/checkout@v4
+
+       - name: Fetch counts data
+         run: bash scripts/downloads/get-git-downloads.sh
+ 
+       - name: Count downloads last month
+         run: python scripts/downloads/count-downloads-last-month.py
+
+       - name: Update readme
+         run: python scripts/downloads/update-downloads-in-readme.py
+  
+       - name: Commit and push if it changed
+         run: |-
+           git config user.name "Automated"
+           git config user.email "actions@users.noreply.github.com"
+           git add -A
+           timestamp=$(date -u)
+           git commit -m "Built on: ${timestamp}" || exit 0
+           git push
