@@ -20,7 +20,7 @@ jobs:
            GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
        - name: Count downloads last month
-         run: python scripts/downloads/count-downloads-last-month.py
+         run: python scripts/downloads/count-downloads-last-month.py > scripts/downloads/last_month.txt
 
        - name: Update readme
          run: python scripts/downloads/update-downloads-in-readme.py
