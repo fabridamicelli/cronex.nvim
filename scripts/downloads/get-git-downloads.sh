@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+
 USERNAME="fabridamicelli"
 REPOSITORY="cronex.nvim"
 RESULT=$(
