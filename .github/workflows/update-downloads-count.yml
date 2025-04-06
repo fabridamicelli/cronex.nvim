@@ -16,7 +16,9 @@ jobs:
 
        - name: Fetch counts data
          run: bash scripts/downloads/get-git-downloads.sh
- 
+         env:
+           GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
        - name: Count downloads last month
          run: python scripts/downloads/count-downloads-last-month.py
 
