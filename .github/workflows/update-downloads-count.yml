@@ -6,7 +6,7 @@ on:
     - cron:  '0 0 * * *'
 
 jobs:
-   update-releases:
+   update-downloads:
      runs-on: ubuntu-latest
      steps:
        - name: Check out this repo
