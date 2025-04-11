@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-latest] # , windows-2022]
+        os: [ubuntu-22.04, macos-latest, windows-2022]
         rev: [nightly, v0.9.5, v0.10.0, v0.11.0]
       # matrix:
       #   include:
