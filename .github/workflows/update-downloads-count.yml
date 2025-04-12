@@ -3,20 +3,24 @@ name: Update downloads
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '0 0 * * *'
+    - cron:  '0 3 * * *'
 
 jobs:
-   update-releases:
+   update-downloads:
      runs-on: ubuntu-latest
+     env:
+       GH_TOKEN: ${{ github.token }}
      steps:
        - name: Check out this repo
          uses: actions/checkout@v4
 
        - name: Fetch counts data
          run: bash scripts/downloads/get-git-downloads.sh
- 
+         env:
+           GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
        - name: Count downloads last month
-         run: python scripts/downloads/count-downloads-last-month.py
+         run: python scripts/downloads/count-downloads-last-month.py > scripts/downloads/last_month.txt
 
        - name: Update readme
          run: python scripts/downloads/update-downloads-in-readme.py
