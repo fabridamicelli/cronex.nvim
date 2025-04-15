@@ -3,7 +3,7 @@ name: Update downloads
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '0 4,16 * * *'
+    - cron:  '0 1,9,17 * * *'
 
 jobs:
    update-downloads:
