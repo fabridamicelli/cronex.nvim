@@ -1,70 +1,60 @@
 local api = vim.api
-local ns = api.nvim_create_namespace("cronex")
 
 local M = {}
+local augroup_name = "plugin-cronex.nvim"
+local augroup = api.nvim_create_augroup(augroup_name, { clear = true })
+local ns = api.nvim_create_namespace(augroup_name)
 
+
+--TODO: rename config arg
 local make_set_explanations = function(config)
 	local set_explanations = function()
-		local bufnr = 0
-		vim.diagnostic.reset(ns, bufnr) -- Start fresh
-
-		local explanations = {}
+		--local bufnr = 0
+		local bufnr = api.nvim_get_current_buf()
+		vim.diagnostic.reset(ns, bufnr)
 		local crons = config.extract()
+		local explanations = {}
 		for lnum, cron in pairs(crons) do
-			local raw_explanation = config.explain(cron)
-			local explanation = config.format(raw_explanation)
-			table.insert(explanations, {
-				bufnr = bufnr,
-				lnum = lnum,
-				col = 0,
-				message = explanation,
-				severity = vim.diagnostic.severity.HINT,
-			})
+			config.explain(cron, lnum, bufnr, explanations, ns)
 		end
-		vim.diagnostic.set(ns, bufnr, explanations, {})
 	end
 	return set_explanations
 end
 
 
-M.hide_explanations = function()
-	vim.diagnostic.reset(ns, 0)
-end
-
-
 M.enable = function()
-	M.augroup = api.nvim_create_augroup("cronex", { clear = true })
+	local set_explanations = make_set_explanations(M.config)
+	-- Recover augroup here in case of call CronExplainedDisable which deletes the augroup
+	augroup = api.nvim_create_augroup(augroup_name, { clear = false })
 	api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
-		group = M.augroup,
+		group = augroup,
 		buffer = 0,
-		callback = require("cronex").set_explanations,
+		callback = set_explanations,
 		desc = "Set explanations when leaving insert mode or changing the text"
 	})
 
 	api.nvim_create_autocmd({ "InsertEnter" }, {
-		group = M.augroup,
+		group = augroup,
 		buffer = 0,
-		callback = require("cronex").hide_explanations,
+		callback = function() vim.diagnostic.reset(ns, 0) end,
 		desc = "Hide explanations when entering insert mode"
 	})
-	require("cronex").set_explanations()
+	set_explanations()
 end
 
 
 M.disable = function()
 	vim.diagnostic.reset(ns, 0)
-	-- pcall: let error (because groud no longer exists) go silent
+	-- pcall: let error (because group no longer exists) go silent
 	-- on successive calls to CronExplainedDisable
 	pcall(function()
-		api.nvim_del_augroup_by_id(M.augroup)
+		api.nvim_del_augroup_by_id(augroup)
 	end)
 end
 
 
 M.setup = function(opts)
 	M.config = require("cronex.config").parse_opts(opts)
-
-	M.set_explanations = make_set_explanations(M.config)
 
 	api.nvim_create_user_command("CronExplainedEnable",
 		require("cronex").enable,
@@ -74,8 +64,8 @@ M.setup = function(opts)
 		require("cronex").disable,
 		{ desc = "Disable explanations of cron expressions" })
 
-	api.nvim_create_autocmd("BufEnter", {
-		group = M.augroup,
+	api.nvim_create_autocmd({ "BufEnter" }, {
+		group = augroup,
 		pattern = M.config.file_patterns,
 		callback = M.enable,
 	})
