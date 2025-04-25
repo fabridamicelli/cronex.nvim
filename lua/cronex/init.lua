@@ -1,4 +1,5 @@
 local api = vim.api
+--TODO: make it cronex.nvim-plugin
 local ns = api.nvim_create_namespace("cronex")
 
 local M = {}
@@ -7,21 +8,26 @@ local make_set_explanations = function(config)
 	local set_explanations = function()
 		local bufnr = 0
 		vim.diagnostic.reset(ns, bufnr) -- Start fresh
+		--local explanations = {}
+		local crons = config.extract()
+		local cmd = '/home/fdamicel/cronstrue/.npm/bin/cronstrue'
 
 		local explanations = {}
-		local crons = config.extract()
 		for lnum, cron in pairs(crons) do
-			local raw_explanation = config.explain(cron)
-			local explanation = config.format(raw_explanation)
-			table.insert(explanations, {
-				bufnr = bufnr,
-				lnum = lnum,
-				col = 0,
-				message = explanation,
-				severity = vim.diagnostic.severity.HINT,
-			})
+			--local raw_explanation =
+			require("cronex.explain").explain(cmd, cron, bufnr, lnum, ns, explanations)
+
+			-- 	local explanation = config.format(raw_explanation)
+			-- 	table.insert(explanations, {
+			-- 		bufnr = bufnr,
+			-- 		lnum = lnum,
+			-- 		col = 0,
+			-- 		message = explanation,
+			-- 		severity = vim.diagnostic.severity.HINT,
+			-- 	})
+			-- end
+			-- vim.diagnostic.set(ns, bufnr, explanations, {})
 		end
-		vim.diagnostic.set(ns, bufnr, explanations, {})
 	end
 	return set_explanations
 end
