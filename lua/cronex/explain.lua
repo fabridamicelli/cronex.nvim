@@ -24,6 +24,7 @@ M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations, cmd_ha
 			end
 			local data = obj.stdout
 			if data ~= "" then ---TODO: check this works
+				-- Update cache
 				M._cache[cron_expression] = data
 				table.insert(explanations, {
 					bufnr = bufnr,
