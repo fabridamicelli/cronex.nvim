@@ -23,11 +23,9 @@ M.parse_opts = function(opts)
 		return opts.extractor.extract(opts.extractor.cron_from_line)
 	end
 
-	local explain = function(cron)
-		local cmd = opts.explainer.cmd
-		local args = opts.explainer.args
-		local full_cmd = vim.tbl_flatten({ cmd, args })
-		return require("cronex.explain").explain(full_cmd, cron)
+	local explain = function(cron, lnum, bufnr, explanations, ns)
+		local cmd = vim.iter({ opts.explainer.cmd, opts.explainer.args }):flatten():totable()
+		require("cronex.explain").explain(cmd, cron, bufnr, lnum, ns, explanations)
 	end
 
 	return {

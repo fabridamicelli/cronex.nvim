@@ -3,8 +3,10 @@ M = {}
 
 M._cache = {}
 
+--TODO:set only changed diagnostics
+--TODO: set_explanations func
 
-M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations, cmd_handles)
+M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations)
 	local cached = M._cache[cron_expression]
 	if cached then
 		table.insert(explanations, {
@@ -39,12 +41,11 @@ M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations, cmd_ha
 			end
 		end
 
-		local handle = vim.system(
+		vim.system(
 			vim.iter({ cmd, cron_expression }):flatten():totable(),
 			{ text = true },
 			on_exit
 		)
-		table.insert(cmd_handles, handle)
 	end
 end
 
