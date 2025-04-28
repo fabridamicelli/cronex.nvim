@@ -22,10 +22,10 @@ local schedule_explanations = function(explanations, ns, bufnr)
 end
 
 
-M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations)
+M.explain = function(cmd, cron_expression, format, bufnr, lnum, ns, explanations)
 	local cached = M._cache[cron_expression]
 	if cached then
-		append_explanation(explanations, cached, bufnr, lnum)
+		append_explanation(explanations, format(cached), bufnr, lnum)
 		schedule_explanations(explanations, ns, bufnr)
 	else
 		local on_exit = function(obj)
@@ -41,7 +41,7 @@ M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations)
 			if data ~= "" then ---TODO: add acceptance test?
 				-- Update cache
 				M._cache[cron_expression] = data
-				append_explanation(explanations, data, bufnr, lnum)
+				append_explanation(explanations, format(data), bufnr, lnum)
 				schedule_explanations(explanations, ns, bufnr)
 			end
 		end

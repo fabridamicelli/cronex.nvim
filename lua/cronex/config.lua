@@ -11,7 +11,7 @@ local defaults = {
 		cmd = "cronstrue",
 		args = {}
 	},
-	format = function(s)
+	format = function(s) --TODO: acceptance test?
 		return s
 	end
 }
@@ -25,14 +25,13 @@ M.parse_opts = function(opts)
 
 	local explain = function(cron, lnum, bufnr, explanations, ns)
 		local cmd = vim.iter({ opts.explainer.cmd, opts.explainer.args }):flatten():totable()
-		require("cronex.explain").explain(cmd, cron, bufnr, lnum, ns, explanations)
+		require("cronex.explain").explain(cmd, cron, opts.format, bufnr, lnum, ns, explanations)
 	end
 
 	return {
 		file_patterns = opts.file_patterns,
 		extract = extract,
 		explain = explain,
-		format = opts.format,
 	}
 end
 
