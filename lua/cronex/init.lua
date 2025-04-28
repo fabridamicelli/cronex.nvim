@@ -6,10 +6,8 @@ local augroup = api.nvim_create_augroup(augroup_name, { clear = true })
 local ns = api.nvim_create_namespace(augroup_name)
 
 
---TODO: rename config arg
 local make_set_explanations = function(config)
 	local set_explanations = function()
-		--local bufnr = 0
 		local bufnr = api.nvim_get_current_buf()
 		vim.diagnostic.reset(ns, bufnr)
 		local crons = config.extract()
@@ -19,6 +17,11 @@ local make_set_explanations = function(config)
 		end
 	end
 	return set_explanations
+end
+
+
+M.reset_explanations = function()
+	vim.diagnostic.reset(ns, 0)
 end
 
 
@@ -36,8 +39,8 @@ M.enable = function()
 	api.nvim_create_autocmd({ "InsertEnter" }, {
 		group = augroup,
 		buffer = 0,
-		callback = function() vim.diagnostic.reset(ns, 0) end,
-		desc = "Hide explanations when entering insert mode"
+		callback = M.reset_explanations,
+		desc = "Reset explanations when entering insert mode"
 	})
 	set_explanations()
 end
