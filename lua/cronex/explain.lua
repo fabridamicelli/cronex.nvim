@@ -29,6 +29,14 @@ M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations)
 		schedule_explanations(explanations, ns, bufnr)
 	else
 		local on_exit = function(obj)
+			if obj.signal == 15 and obj.code == 124 then --TODO: acceptance test?
+				vim.schedule(function()
+					vim.notify(string.format(
+						"CronExplained Timeout with cmd %s and args %s", vim.inspect(cmd), cron_expression
+					))
+				end)
+			end
+
 			local data = obj.stdout
 			if data ~= "" then ---TODO: add acceptance test?
 				-- Update cache
@@ -41,17 +49,16 @@ M.explain = function(cmd, cron_expression, bufnr, lnum, ns, explanations)
 		vim.system(
 			vim.iter({ cmd, cron_expression }):flatten():totable(),
 			{
-				timeout = 2000, --TODO : add to config
+				timeout = 10000, --TODO : add to config
 				text = true,
 				stderr = function(_, data)
 					if data then
 						vim.schedule(function()
-							local msg = string.format(
+							vim.notify(string.format(
 								"Error calling cmd %s with args %s.\nStderr: \n %s", vim.inspect(cmd),
 								cron_expression,
 								data
-							)
-							vim.notify(msg)
+							))
 						end)
 					end
 				end
