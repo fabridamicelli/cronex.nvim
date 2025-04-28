@@ -20,10 +20,6 @@ local make_set_explanations = function(config)
 end
 
 
-M.reset_explanations = function()
-	vim.diagnostic.reset(ns, 0)
-end
-
 
 M.enable = function()
 	local set_explanations = make_set_explanations(M.config)
@@ -34,13 +30,6 @@ M.enable = function()
 		buffer = 0,
 		callback = set_explanations,
 		desc = "Set explanations when leaving insert mode or changing the text"
-	})
-
-	api.nvim_create_autocmd({ "InsertEnter" }, {
-		group = augroup,
-		buffer = 0,
-		callback = M.reset_explanations,
-		desc = "Reset explanations when entering insert mode"
 	})
 	set_explanations()
 end
