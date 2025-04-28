@@ -1,14 +1,16 @@
+local augroup_name = "plugin-cronex.nvim"
+
 local check_autocmds = function(autocmds)
     -- Make sure the callbacks of the autocmds are correct
     for _, cmd in pairs(autocmds) do
         assert.True(vim.tbl_contains({ "InsertEnter", "InsertLeave", "TextChanged" }, cmd.event))
 
         if cmd.event == "InsertLeave" or cmd.event == "TextChanged" then
-            assert.are.equal(cmd.callback, require("cronex").set_explanations)
+            assert.are.equal(cmd.desc, "Set explanations when leaving insert mode or changing the text")
         end
 
         if cmd.event == "InsertEnter" then
-            assert.are.equal(cmd.callback, require("cronex").hide_explanations)
+            assert.are.equal(cmd.callback, require("cronex").reset_explanations)
         end
     end
 end
@@ -31,7 +33,7 @@ describe("api - exposed : ", function()
 
     it("Toggle plugin adds/deletes autocommands", function()
         -- Start clean
-        local g = vim.api.nvim_create_augroup("cronex", { clear = true })
+        local g = vim.api.nvim_create_augroup(augroup_name, { clear = true })
         assert.are.same({}, vim.api.nvim_get_autocmds({ group = g }))
 
         -- Activating plugin should make autocmds available
@@ -55,7 +57,7 @@ describe("api - exposed : ", function()
 
         -- Re-activating plugin should make commands available again
         vim.cmd("CronExplainedEnable")
-        local g2 = vim.api.nvim_create_augroup("cronex", { clear = false })
+        local g2 = vim.api.nvim_create_augroup(augroup_name, { clear = false })
         local autocmds2 = vim.api.nvim_get_autocmds({ group = g2 })
         check_autocmds(autocmds2)
     end)

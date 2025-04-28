@@ -22,6 +22,11 @@ local make_set_explanations = function(config)
 end
 
 
+M.reset_explanations = function()
+	vim.diagnostic.reset(ns, 0)
+end
+
+
 M.enable = function()
 	local set_explanations = make_set_explanations(M.config)
 	-- Recover augroup here in case of call CronExplainedDisable which deletes the augroup
@@ -36,7 +41,7 @@ M.enable = function()
 	api.nvim_create_autocmd({ "InsertEnter" }, {
 		group = augroup,
 		buffer = 0,
-		callback = function() vim.diagnostic.reset(ns, 0) end,
+		callback = M.reset_explanations,
 		desc = "Hide explanations when entering insert mode"
 	})
 	set_explanations()
