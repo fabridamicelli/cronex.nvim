@@ -3,14 +3,10 @@ local augroup_name = "plugin-cronex.nvim"
 local check_autocmds = function(autocmds)
     -- Make sure the callbacks of the autocmds are correct
     for _, cmd in pairs(autocmds) do
-        assert.True(vim.tbl_contains({ "InsertEnter", "InsertLeave", "TextChanged" }, cmd.event))
+        assert.True(vim.tbl_contains({ "InsertLeave", "TextChanged" }, cmd.event))
 
         if cmd.event == "InsertLeave" or cmd.event == "TextChanged" then
             assert.are.equal(cmd.desc, "Set explanations when leaving insert mode or changing the text")
-        end
-
-        if cmd.event == "InsertEnter" then
-            assert.are.equal(cmd.callback, require("cronex").reset_explanations)
         end
     end
 end
