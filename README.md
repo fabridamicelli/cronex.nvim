@@ -8,19 +8,23 @@ If you find this work useful, don't forget to give it a GitHub ⭐ to help other
 Human-readable cron expressions in Neovim
 
 ## What is Cronex
-Cronex is a Neovim plugin to render in-line, human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron):
+Cronex is a Neovim plugin to asynchronously render in-line, human-readable explanations of [cron expressions](https://en.wikipedia.org/wiki/Cron):
 
 [Here's a short introduction video](https://www.youtube.com/live/Se8SKgmCnkc?t=31717s).
 
 <img src='./images/screencast-usage.gif' width='800'>
 
 This plugin is **not** a cron expression parser/checker by itself.
-Cronex is rather the "client" that allows the Neovim user to integrate and customize "servers" (cron expression "explainers") in a flexible fashion.
+Cronex is rather the "client" that allows the Neovim user to integrate and customize "servers" (cron expression "explainers") in a flexible fashion, with fully asynchronous non-blocking API.
 There are several implementations of those out there (see below).
 You can use any of those with Cronex.
 
 ## Getting Started
 ### Dependencies
+Since version 0.2.0, `cronex.nvim` depends on `Neovim >= v0.10`.
+If you're using `Neovim v0.9.*` pin `cronex to 0.1.*` (see below under `Installation`).
+
+
 You will need a cron expression explainer installed.
 The default is [cronstrue](https://www.npmjs.com/package/cronstrue), which is the one used by the [vscode package `cron-explained`](https://marketplace.visualstudio.com/items?itemName=tumido.cron-explained).
 
@@ -33,16 +37,27 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 -- init.lua:
-    {
-    'fabridamicelli/cronex.nvim',
-    opts = {}, 
-    }
+{
+'fabridamicelli/cronex.nvim',
+opts = {}, 
+}
 
 -- Or
 -- plugins/cronex.lua:
 return {
     'fabridamicelli/cronex.nvim',
     opts = {},
+}
+```
+
+If you are using `Neovim v0.9.*`, tag to earlier versions like so:
+
+```lua
+-- init.lua:
+{
+'fabridamicelli/cronex.nvim',
+tag = "0.1.*",
+opts = {}, 
 }
 ```
 
@@ -102,11 +117,14 @@ require("cronex").setup({
         -- examples:
         -- "/path/to/miniconda3/envs/neovim/bin/cronstrue" (point to a conda virtualenv)
         -- "python explainer.py" (assuming you have such a python script available)
-        cmd = "cronstrue",
+        cmd = "cronstrue",  -- or a table, eg: cmd = {"bash", "./my-cron-script.sh"}
         -- Optional arguments to pass to the command
         -- eg: "/path/to/a/go/binary"  (assuming you have a go binary)
         -- args = { "-print-all" }  (assuming the program understands the flag 'print-all')
-        args = {}
+        args = {},
+        --Timeout in milliseconds to wait for the command to finish.
+        -- Cronex will throw a notification message if you run into a timeout.
+        timeout = 10000,
     },
     -- Configure the post-processing of the explanation string.
     -- eg: transform "* * * * *": Every minute --to--> Every minute
@@ -209,7 +227,8 @@ This is the default:
 require("cronex").setup({
     explainer = {
         cmd = "cronstrue",
-        args = {}
+        args = {},
+        timeout = 10000
     } 
 })
 ```
@@ -298,14 +317,12 @@ That will transform it like this:
 ```
 
 ## Limitations
+- Some terminals might make the cron explanations (diagnostic hints) flicker on the first call (only if you have many of them, but for most users this will not be noticeable).
 The current `extract` logic is a bit rudimentary (partly because regex in lua are a bit trickier than normal (at least for me).
 Any improvement along those lines is more than welcome.
 
-The call to the explainer is a blocking operation.
-While testing I found that to be a problem only if there are unrealistically many cron expressions in the buffer.  
-Also, the Go implementation of the explainer is so fast that even having hundreds of expressions in a buffer everything runs decently fast.  
-In short, my guess is that almost no user (if any at all) will notice this.
-Having said that, a few potential ideas to improve performance:
+The Go implementation of the explainer is so fast that even having hundreds of expressions in a buffer everything runs decently fast.  
+Potential ideas to improve performance:
 - Accelerating extraction, for example, by using `ripgrep` to extract all crons in one shot (instead of iterating over lines)
 - Implementing the explainer in pure lua to avoid external calls
 
@@ -314,3 +331,14 @@ Having said that, a few potential ideas to improve performance:
 So having repeated expressions in one line will result in no explanation at all.
 I haven't seen use-cases where it makes sense to have more than one, but I'd be open to consider it if that makes sense.
 - If encountering problems with an expression, disable the format in order to see the exact output coming from the explainer
+
+## TODO
+- make screencast gif
+- Accept diagnostics config? (nvim 0.11)
+- add command timeout
+- ci: new version only nvim >0.10
+
+- config notification symbol?
+- ripgrep extraction?
+- add proper docs
+- test call in CI
