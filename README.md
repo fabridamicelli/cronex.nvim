@@ -302,14 +302,14 @@ docker build -t cronstrue -f Dockerfile .
 
 and configuring the plugin like so:
 ```lua
-return {
-	"fabridamicelli/cronex.nvim",
-	opts = {
-		explainer = {
-			cmd = "docker",
-			args = { "run", "-i", "--rm", "cronstrue:latest" },
-		},
-	},
+{
+"fabridamicelli/cronex.nvim",
+opts = {
+    explainer = {
+        cmd = "docker",
+        args = { "run", "-i", "--rm", "cronstrue:latest" },
+    }
+},
 }
 ```
 
