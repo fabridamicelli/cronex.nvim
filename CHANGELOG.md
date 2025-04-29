@@ -2,6 +2,7 @@
 
 ### Breaking changes
 - Require: `Neovim` version >=0.10 
+- The namespace used by the plugin is now called "plugin-cronex.nvim" (previously "cronex"). That should be updated in case you are relying on it, eg `vim.api.nvim_get_namespaces()["cronex"]` --> `vim.api.nvim_get_namespaces()["cronex"]`
 
 ### Feat
 - Non-blocking system call in explainer: System calls occur asynchronously in the background and the diagnostics are populated as they come from stdout. This allows for the user to keep editing text without interruption even with a lot of cron expressions on the buffer.
