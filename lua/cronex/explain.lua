@@ -22,7 +22,7 @@ local schedule_explanations = function(explanations, ns, bufnr)
 end
 
 
-M.explain = function(cmd, cron_expression, format, bufnr, lnum, ns, explanations)
+M.explain = function(cmd, timeout, cron_expression, format, bufnr, lnum, ns, explanations)
 	local cached = M._cache[cron_expression]
 	if cached then
 		append_explanation(explanations, format(cached), bufnr, lnum)
@@ -49,7 +49,7 @@ M.explain = function(cmd, cron_expression, format, bufnr, lnum, ns, explanations
 		vim.system(
 			vim.iter({ cmd, cron_expression }):flatten():totable(),
 			{
-				timeout = 10000, --TODO : add to config
+				timeout = timeout,
 				text = true,
 				stderr = function(_, data)
 					if data then
