@@ -49,7 +49,7 @@ M.setup = function(opts)
 	M.config = require("cronex.config").parse_opts(opts)
 
 	api.nvim_create_user_command("CronExplainedEnable",
-		require("cronex").enable,
+		vim.schedule_wrap(require("cronex").enable),
 		{ desc = "Enable explanations of cron expressions" })
 
 	api.nvim_create_user_command("CronExplainedDisable",
@@ -59,7 +59,7 @@ M.setup = function(opts)
 	api.nvim_create_autocmd({ "BufEnter" }, {
 		group = augroup,
 		pattern = M.config.file_patterns,
-		callback = M.enable,
+		callback = vim.schedule_wrap(M.enable),
 	})
 end
 
