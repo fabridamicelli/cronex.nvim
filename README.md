@@ -217,8 +217,8 @@ For example:
 ```
 
 ### Explainer
-As already mentioned above, Cronex is the integrates the functionality of external cron expression explainers into Neovim.
-There are several implementations of those [out there]().
+As already mentioned above, Cronex integrates the functionality of external cron expression explainers into Neovim.
+There are several implementations of those out there.
 
 More generally, it's up to the user which explainer program to use in the background.
 Cronex will call such program via the command (`cmd`), collect the output and pass it along to Neovim.  
@@ -271,6 +271,37 @@ conda install nodejs -c conda-forge
 npm install cronstrue
 ```
 After that `cronstrue` will only be installed inside `venv` (thus only available there).
+
+You could even call the program running in a docker container using a dockerfile like this:
+```Dockerfile
+FROM node:lts-alpine@sha256:ad1aedbcc1b0575074a91ac146d6956476c1f9985994810e4ee02efd932a68fd
+
+RUN npm install -g cronstrue@2.50.0
+
+ENTRYPOINT [ "/usr/local/bin/cronstrue" ]
+```
+
+building the image:
+```bash
+docker build -t cronstrue -f Dockerfile .
+```
+
+and configuring the plugin like so:
+
+```lua
+return {
+	"fabridamicelli/cronex.nvim",
+	opts = {
+		explainer = {
+			cmd = "docker",
+			args = { "run", "-i", "--rm", "cronstrue:latest" },
+		},
+		format = function(s)
+			return s
+		end
+	},
+}
+```
 
 
 ***`hcron:`***
