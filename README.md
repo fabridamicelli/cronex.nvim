@@ -272,38 +272,6 @@ npm install cronstrue
 ```
 After that `cronstrue` will only be installed inside `venv` (thus only available there).
 
-You could even call the program running in a docker container using a dockerfile like this:
-```Dockerfile
-FROM node:lts-alpine@sha256:ad1aedbcc1b0575074a91ac146d6956476c1f9985994810e4ee02efd932a68fd
-
-RUN npm install -g cronstrue@2.50.0
-
-ENTRYPOINT [ "/usr/local/bin/cronstrue" ]
-```
-
-building the image:
-```bash
-docker build -t cronstrue -f Dockerfile .
-```
-
-and configuring the plugin like so:
-
-```lua
-return {
-	"fabridamicelli/cronex.nvim",
-	opts = {
-		explainer = {
-			cmd = "docker",
-			args = { "run", "-i", "--rm", "cronstrue:latest" },
-		},
-		format = function(s)
-			return s
-		end
-	},
-}
-```
-
-
 ***`hcron:`***
 This explainer is written in Go and much considerably faster than the default.
 But it is not as widely used and the project does not seem to be that well maintained.
@@ -318,6 +286,32 @@ Here's a (non-exhaustive) overview cron explainers out there:
 | .NET       | https://github.com/bradymholt/cron-expression-descriptor|
 | Java       | https://github.com/grahamar/cron-parser                 |
 | Rust       | https://github.com/zslayton/cron                        |
+
+#### Calling the explainer running in docker container
+You could even call the program running in a docker container using a dockerfile like this:
+```Dockerfile
+FROM node:lts-alpine@sha256:ad1aedbcc1b0575074a91ac146d6956476c1f9985994810e4ee02efd932a68fd
+RUN npm install -g cronstrue@2.50.0
+ENTRYPOINT [ "/usr/local/bin/cronstrue" ]
+```
+
+building the image:
+```bash
+docker build -t cronstrue -f Dockerfile .
+```
+
+and configuring the plugin like so:
+```lua
+return {
+	"fabridamicelli/cronex.nvim",
+	opts = {
+		explainer = {
+			cmd = "docker",
+			args = { "run", "-i", "--rm", "cronstrue:latest" },
+		},
+	},
+}
+```
 
 
 ### format
