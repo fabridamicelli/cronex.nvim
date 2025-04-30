@@ -11,7 +11,7 @@ local check_autocmds = function(autocmds)
     end
 end
 
-describe("api - exposed : ", function()
+describe("api - exposed ui: ", function()
     it("cronex package can be required", function()
         require("cronex")
     end)
@@ -95,5 +95,69 @@ describe("api - internals: ", function()
         local group = vim.api.nvim_create_augroup("cronex", { clear = true })
         local autocmds = vim.api.nvim_get_autocmds({ group = group })
         check_autocmds(autocmds)
+    end)
+end)
+
+describe("acceptance: ", function()
+    it("Detect cron on buffer and set diagnostics with custom setup opts", function()
+        -- Make mock buffer
+        local buf = vim.api.nvim_create_buf(false, true)
+        local before = vim.diagnostic.get(buf)["plugin-cronex.nvim"]
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, {
+            "hello",
+            "world",
+            "'* * * * *'",
+            "i have no cron",
+            "'1 * * 1 * *'",
+        })
+        vim.api.nvim_set_current_buf(buf)
+        assert.are.equal(before, nil) -- should be emtpy because plugin is inactive
+        local cronex = require("cronex")
+        cronex.setup({
+            explainer = {
+                cmd = { "echo", "a-great-cron||explanation" }
+            },
+            format = function(explanation)
+                local sep = string.find(explanation, "||")
+                if sep then
+                    return string.sub(explanation, sep + 2) -- Return everything after sep
+                end
+                return explanation
+            end
+        })
+        vim.cmd("CronExplainedEnable")
+
+        -- Wait for system call to get back with cron explainations
+        local co = coroutine.running()
+        vim.defer_fn(function()
+            coroutine.resume(co)
+        end, 1000)
+        --The test will reach here immediately.
+        coroutine.yield() --The test will only reach here after one second, when the deferred function runs.
+
+        local diags = vim.diagnostic.get(buf)
+        local ns = vim.api.nvim_get_namespaces()["plugin-cronex.nvim"]
+        assert.are.same(diags, { {
+            bufnr = buf,
+            col = 0,
+            end_col = 0,
+            end_lnum = 2,
+            lnum = 2,
+            message = "explanation * * * * *\n",
+            namespace = ns,
+            severity = 4
+        }, {
+            bufnr = buf,
+            col = 0,
+            end_col = 0,
+            end_lnum = 4,
+            lnum = 4,
+            message = "explanation 1 * * 1 * *\n",
+            namespace = ns,
+            severity = 4
+        } })
+        -- Deactivating plugin should remove Diagnostics
+        vim.cmd("CronExplainedDisable")
+        assert.are.same(vim.diagnostic.get(buf), {})
     end)
 end)
