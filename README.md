@@ -272,21 +272,6 @@ npm install cronstrue
 ```
 After that `cronstrue` will only be installed inside `venv` (thus only available there).
 
-***`hcron:`***
-This explainer is written in Go and much considerably faster than the default.
-But it is not as widely used and the project does not seem to be that well maintained.
-Recommendation: Compile the binary
-
-Here's a (non-exhaustive) overview cron explainers out there:
-| Language   | Link                                                    |
-|------------| --------------------------------------------------------|
-| JavaScript | https://github.com/bradymholt/cronstrue                 |
-| Go         | https://github.com/lnquy/cron                           |
-| Python     | https://github.com/Salamek/cron-descriptor              |
-| .NET       | https://github.com/bradymholt/cron-expression-descriptor|
-| Java       | https://github.com/grahamar/cron-parser                 |
-| Rust       | https://github.com/zslayton/cron                        |
-
 #### Calling the explainer running in docker container
 You could even call the program running in a docker container using a dockerfile like this:
 ```Dockerfile
@@ -312,6 +297,24 @@ opts = {
 },
 }
 ```
+
+
+
+
+***`hcron:`***
+This explainer is written in Go and much considerably faster than the default.
+But it is not as widely used and the project does not seem to be that well maintained.
+Recommendation: Compile the binary
+
+Here's a (non-exhaustive) overview cron explainers out there:
+| Language   | Link                                                    |
+|------------| --------------------------------------------------------|
+| JavaScript | https://github.com/bradymholt/cronstrue                 |
+| Go         | https://github.com/lnquy/cron                           |
+| Python     | https://github.com/Salamek/cron-descriptor              |
+| .NET       | https://github.com/bradymholt/cron-expression-descriptor|
+| Java       | https://github.com/grahamar/cron-parser                 |
+| Rust       | https://github.com/zslayton/cron                        |
 
 
 ### format
