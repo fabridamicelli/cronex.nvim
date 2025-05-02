@@ -12,7 +12,7 @@ local defaults = {
 		args = {},
 		timeout = 10000, --TODO : acceptance test?
 	},
-	format = function(s) --TODO: acceptance test?
+	format = function(s)
 		return s
 	end
 }

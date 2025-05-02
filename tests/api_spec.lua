@@ -115,14 +115,10 @@ describe("acceptance: ", function()
         local cronex = require("cronex")
         cronex.setup({
             explainer = {
-                cmd = { "echo", "a-great-cron||explanation" }
+                cmd = { "echo", "great-explanation" }
             },
             format = function(explanation)
-                local sep = string.find(explanation, "||")
-                if sep then
-                    return string.sub(explanation, sep + 2) -- Return everything after sep
-                end
-                return explanation
+                return "hello-" .. explanation
             end
         })
         vim.cmd("CronExplainedEnable")
@@ -132,7 +128,6 @@ describe("acceptance: ", function()
         vim.defer_fn(function()
             coroutine.resume(co)
         end, 1000)
-        --The test will reach here immediately.
         coroutine.yield() --The test will only reach here after one second, when the deferred function runs.
 
         local diags = vim.diagnostic.get(buf)
@@ -143,7 +138,7 @@ describe("acceptance: ", function()
             end_col = 0,
             end_lnum = 2,
             lnum = 2,
-            message = "explanation * * * * *\n",
+            message = "hello-great-explanation * * * * *\n",
             namespace = ns,
             severity = 4
         }, {
@@ -152,7 +147,7 @@ describe("acceptance: ", function()
             end_col = 0,
             end_lnum = 4,
             lnum = 4,
-            message = "explanation 1 * * 1 * *\n",
+            message = "hello-great-explanation 1 * * 1 * *\n",
             namespace = ns,
             severity = 4
         } })

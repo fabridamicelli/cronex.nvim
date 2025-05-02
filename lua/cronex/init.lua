@@ -56,6 +56,8 @@ M.setup = function(opts)
 		require("cronex").disable,
 		{ desc = "Disable explanations of cron expressions" })
 
+
+	augroup = api.nvim_create_augroup(augroup_name, { clear = false })
 	api.nvim_create_autocmd({ "BufEnter" }, {
 		group = augroup,
 		pattern = M.config.file_patterns,
