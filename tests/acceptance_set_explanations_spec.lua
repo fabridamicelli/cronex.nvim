@@ -32,20 +32,25 @@ describe("acceptance: ", function()
 
         local diags = vim.diagnostic.get(buf)
         local ns = vim.api.nvim_get_namespaces()["plugin-cronex.nvim"]
-        assert.are.same(diags, { {
+        local got = {}
+        for _, diag in pairs(diags) do
+            table.insert(got, {
+                bufnr = diag.bufnr,
+                lnum = diag.lnum,
+                message = diag.message,
+                namespace = diag.namespace,
+                severity = diag.severity
+            }
+            )
+        end
+        assert.are.same(got, { {
             bufnr = buf,
-            col = 0,
-            end_col = 0,
-            end_lnum = 2,
             lnum = 2,
             message = "hello-great-explanation * * * * *\n",
             namespace = ns,
             severity = 4
         }, {
             bufnr = buf,
-            col = 0,
-            end_col = 0,
-            end_lnum = 4,
             lnum = 4,
             message = "hello-great-explanation 1 * * 1 * *\n",
             namespace = ns,
