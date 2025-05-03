@@ -16,91 +16,91 @@ local nparts2pat = {
 }
 
 local get_cron_for_pat = function(line, pat)
-    -- Only allow 1 expression per line
-    local n_quotes = 0
-    for _ in string.gmatch(line, "['\"]") do
-        n_quotes = n_quotes + 1
-    end
-    if n_quotes > 2 then
-        return nil
-    end
+	-- Only allow 1 expression per line
+	local n_quotes = 0
+	for _ in string.gmatch(line, "['\"]") do
+		n_quotes = n_quotes + 1
+	end
+	if n_quotes > 2 then
+		return nil
+	end
 
-    -- Build match and count as we go
-    local match = ""
-    local n_matches = 0
-    for m in string.gmatch(line, pat) do
-        n_matches = n_matches + 1
-        match = match .. m
-    end
-    if match == "" or n_matches > 1 then
-        return nil
-    end
+	-- Build match and count as we go
+	local match = ""
+	local n_matches = 0
+	for m in string.gmatch(line, pat) do
+		n_matches = n_matches + 1
+		match = match .. m
+	end
+	if match == "" or n_matches > 1 then
+		return nil
+	end
 
-    -- Remove " and '
-    local clean = ""
-    for i = 1, #match do
-        local c = string.sub(match, i, i)
-        if c ~= "'" and c ~= '"' then
-            clean = clean .. c
-        end
-    end
+	-- Remove " and '
+	local clean = ""
+	for i = 1, #match do
+		local c = string.sub(match, i, i)
+		if c ~= "'" and c ~= '"' then
+			clean = clean .. c
+		end
+	end
 
-    -- Strip white space at beginning and end
-    if string.sub(clean, 1, 1) == " " then
-        clean = string.sub(clean, 2)
-    end
-    if string.sub(clean, -1, -1) == " " then
-        clean = string.sub(clean, 0, -2)
-    end
+	-- Strip white space at beginning and end
+	if string.sub(clean, 1, 1) == " " then
+		clean = string.sub(clean, 2)
+	end
+	if string.sub(clean, -1, -1) == " " then
+		clean = string.sub(clean, 0, -2)
+	end
 
-    return clean
+	return clean
 end
 
 M.cron_from_line = function(line)
-    for n = 7, 5, -1 do
-        local pat = nparts2pat[n]
-        local match = get_cron_for_pat(line, pat)
-        if match then
-            return match
-        end
-    end
-    return nil
+	for n = 7, 5, -1 do
+		local pat = nparts2pat[n]
+		local match = get_cron_for_pat(line, pat)
+		if match then
+			return match
+		end
+	end
+	return nil
 end
 
 -- Patterns for standard crontab format (no quotes)
 local crontab_patterns = {
-    -- Standard 5-part cron expression (minute hour day month weekday)
-    "^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
-    -- Special time strings like @daily, @hourly, etc.
-    "^%s*(@%w+)%s"
+	-- Standard 5-part cron expression (minute hour day month weekday)
+	"^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
+	-- Special time strings like @daily, @hourly, etc.
+	"^%s*(@%w+)%s",
 }
 
 -- Extract cron expression from crontab format without quotes
 M.cron_from_line_crontab = function(line)
-    -- Skip comments and empty lines
-    if line:match("^%s*#") or line:match("^%s*$") then
-        return nil
-    end
-    
-    -- First try the standard method in case it has quotes
-    local quoted_match = M.cron_from_line(line)
-    if quoted_match then
-        return quoted_match
-    end
-    
-    -- Check for standard 5-part cron expression
-    local min, hour, day, month, weekday = line:match(crontab_patterns[1])
-    if min and hour and day and month and weekday then
-        return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
-    end
-    
-    -- Check for special time strings
-    local special = line:match(crontab_patterns[2])
-    if special then
-        return special
-    end
-    
-    return nil
+	-- Skip comments and empty lines
+	if line:match("^%s*#") or line:match("^%s*$") then
+		return nil
+	end
+
+	-- First try the standard method in case it has quotes
+	local quoted_match = M.cron_from_line(line)
+	if quoted_match then
+		return quoted_match
+	end
+
+	-- Check for standard 5-part cron expression
+	local min, hour, day, month, weekday = line:match(crontab_patterns[1])
+	if min and hour and day and month and weekday then
+		return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
+	end
+
+	-- Check for special time strings
+	local special = line:match(crontab_patterns[2])
+	if special then
+		return special
+	end
+
+	return nil
 end
 
 return M
