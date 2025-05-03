@@ -366,6 +366,7 @@ I haven't seen use-cases where it makes sense to have more than one, but I'd be 
 - Accept diagnostics config? (nvim 0.11)
 - add command timeout
 - ci: new version only nvim >0.10
+- add config example with custom diagnostic prefix
 
 - config notification symbol?
 - ripgrep extraction?
