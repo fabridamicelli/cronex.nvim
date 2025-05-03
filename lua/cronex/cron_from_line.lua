@@ -67,4 +67,40 @@ M.cron_from_line = function(line)
     return nil
 end
 
+-- Patterns for standard crontab format (no quotes)
+local crontab_patterns = {
+    -- Standard 5-part cron expression (minute hour day month weekday)
+    "^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
+    -- Special time strings like @daily, @hourly, etc.
+    "^%s*(@%w+)%s"
+}
+
+-- Extract cron expression from crontab format without quotes
+M.cron_from_line_crontab = function(line)
+    -- Skip comments and empty lines
+    if line:match("^%s*#") or line:match("^%s*$") then
+        return nil
+    end
+    
+    -- First try the standard method in case it has quotes
+    local quoted_match = M.cron_from_line(line)
+    if quoted_match then
+        return quoted_match
+    end
+    
+    -- Check for standard 5-part cron expression
+    local min, hour, day, month, weekday = line:match(crontab_patterns[1])
+    if min and hour and day and month and weekday then
+        return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
+    end
+    
+    -- Check for special time strings
+    local special = line:match(crontab_patterns[2])
+    if special then
+        return special
+    end
+    
+    return nil
+end
+
 return M
