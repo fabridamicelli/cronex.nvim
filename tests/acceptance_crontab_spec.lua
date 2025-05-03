@@ -116,7 +116,11 @@ describe("acceptance: crontab file pattern", function()
                 "* * * * * /usr/bin/command",
                 "30 5 * * 1-5 /path/to/script",
                 "# this line has no cron",
-                "@daily /another/command"
+                "@daily /another/command",
+                "0 */4 * * * run-parts /etc/cron.4hourly",
+                "* * * * * 1 2 3 should-only-match-first-5-parts",
+                "0 0 * * * 6 should-handle-6-as-cmd",
+                "0 1 2 3 4 5 cronwith6parts"
             })
             
             -- Load but don't setup yet
@@ -158,27 +162,55 @@ describe("acceptance: crontab file pattern", function()
             assert.is_not_nil(diags, "Diagnostics should exist")
             assert.is_true(#diags > 0, "Should have diagnostics for cron lines")
             
-            -- Should have diagnostics for both cron lines
-            assert.are.equal(3, #diags, "Should have 3 diagnostics (2 standard cron lines + @daily)")
+            -- Should have diagnostics for all cron lines (not comments)
+            assert.are.equal(7, #diags, "Should have 7 diagnostics for all cron lines")
             
-            -- Verify first cron line has explanation
-            local has_first_cron = false
-            local has_second_cron = false
-            local has_at_daily = false
-            
-            for _, diag in ipairs(diags) do
-                if diag.lnum == 0 then
-                    has_first_cron = true
-                elseif diag.lnum == 1 then
-                    has_second_cron = true
-                elseif diag.lnum == 3 then
-                    has_at_daily = true
-                end
+            -- Verify all lines have explanations
+            local line_has_diag = {}
+            for i = 0, 7 do
+                line_has_diag[i] = false
             end
             
-            assert.is_true(has_first_cron, "Should recognize '* * * * *' pattern")
-            assert.is_true(has_second_cron, "Should recognize '30 5 * * 1-5' pattern")
-            assert.is_true(has_at_daily, "Should recognize '@daily' special syntax")
+            for _, diag in ipairs(diags) do
+                line_has_diag[diag.lnum] = true
+            end
+            
+            -- Standard 5-part cron expressions
+            assert.is_true(line_has_diag[0], "Should recognize '* * * * *' pattern")
+            assert.is_true(line_has_diag[1], "Should recognize '30 5 * * 1-5' pattern")
+            assert.is_false(line_has_diag[2], "Should ignore comment lines")
+            assert.is_true(line_has_diag[3], "Should recognize '@daily' special syntax")
+            assert.is_true(line_has_diag[4], "Should recognize '0 */4 * * *' pattern")
+            assert.is_true(line_has_diag[5], "Should only match first 5 parts")
+            assert.is_true(line_has_diag[7], "Should recognize 6-part cron")
+            
+            -- Verify that 6-part cron is recognized correctly
+            for _, diag in ipairs(diags) do
+                if diag.lnum == 7 then
+                    local expected_cron = "1 2 3 4 5" -- 5 parts, ignoring seconds
+                    assert.truthy(string.match(diag.message, "test%-explanation"))
+                end
+            end
+        end)
+        
+        it("Correctly parses 6-part cron expressions", function()
+            -- Test the cron_from_line_crontab function directly
+            local cron_from_line_crontab = require("cronex.cron_from_line").cron_from_line_crontab
+            
+            -- 5-part expression
+            local five_part = "30 5 * * 1-5 /path/to/script"
+            local cron5 = cron_from_line_crontab(five_part) 
+            assert.are.equal("30 5 * * 1-5", cron5)
+            
+            -- 6-part expression (with seconds)
+            local six_part = "0 30 5 * * 1-5 /path/to/script"
+            local cron6 = cron_from_line_crontab(six_part)
+            assert.are.equal("30 5 * * 1-5", cron6, "6-part cron should return only the 5 standard parts excluding seconds")
+            
+            -- Command that happens to have numbers that could be mistaken for cron parts
+            local cmd_with_numbers = "* * * * * 1 2 3 command"
+            local cron_cmd = cron_from_line_crontab(cmd_with_numbers)
+            assert.are.equal("* * * * 1", cron_cmd, "Should extract cron parts correctly")
         end)
     end)
 end)

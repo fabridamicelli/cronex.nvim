@@ -70,38 +70,47 @@ end
 
 -- Patterns for standard crontab format (no quotes)
 local crontab_patterns = {
-    -- Standard 5-part cron expression (minute hour day month weekday)
-    "^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
-    -- Special time strings like @daily, @hourly, etc.
-    "^%s*(@%w+)%s"
+	-- Standard 5-part cron expression (minute hour day month weekday)
+	"^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
+	-- Special time strings like @daily, @hourly, etc.
+	"^%s*(@%w+)%s",
 }
 
 -- Extract cron expression from crontab format without quotes
 M.cron_from_line_crontab = function(line)
-    -- Skip comments and empty lines
-    if line:match("^%s*#") or line:match("^%s*$") then
-        return nil
-    end
-    
-    -- First try the standard method in case it has quotes
-    local quoted_match = M.cron_from_line(line)
-    if quoted_match then
-        return quoted_match
-    end
-    
-    -- Check for standard 5-part cron expression
-    local min, hour, day, month, weekday = line:match(crontab_patterns[1])
-    if min and hour and day and month and weekday then
-        return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
-    end
-    
-    -- Check for special time strings
-    local special = line:match(crontab_patterns[2])
-    if special then
-        return special
-    end
-    
-    return nil
+	-- Skip comments and empty lines
+	if line:match("^%s*#") or line:match("^%s*$") then
+		return nil
+	end
+
+	-- First try the standard method in case it has quotes
+	local quoted_match = M.cron_from_line(line)
+	if quoted_match then
+		return quoted_match
+	end
+
+	-- Check for cron with 6 parts (some implementations add seconds)
+	local six_part_pattern =
+		"^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s"
+	local sec, min_six, hour_six, day_six, month_six, weekday_six = line:match(six_part_pattern)
+	if sec and min_six and hour_six and day_six and month_six and weekday_six then
+		-- For 6-part cron, return only the standard 5 parts (ignore seconds)
+		return min_six .. " " .. hour_six .. " " .. day_six .. " " .. month_six .. " " .. weekday_six
+	end
+
+	-- Check for standard 5-part cron expression
+	local min, hour, day, month, weekday = line:match(crontab_patterns[1])
+	if min and hour and day and month and weekday then
+		return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
+	end
+
+	-- Check for special time strings
+	local special = line:match(crontab_patterns[2])
+	if special then
+		return special
+	end
+
+	return nil
 end
 
 return M
