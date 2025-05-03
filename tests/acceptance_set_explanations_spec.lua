@@ -42,25 +42,29 @@ describe("acceptance: ", function()
                 severity = diag.severity,
             })
         end
-        assert.are.same(
-            got,
+        table.sort(got, function(a, b)
+            return a.lnum < b.lnum
+        end)
+        local expected = {
             {
-                {
-                    bufnr = buf,
-                    lnum = 2,
-                    message = "hello-great-explanation * * * * *\n",
-                    namespace = ns,
-                    severity = 4,
-                },
-                {
-                    bufnr = buf,
-                    lnum = 4,
-                    message = "hello-great-explanation 1 * * 1 * *\n",
-                    namespace = ns,
-                    severity = 4,
-                },
-            }
-        )
+                bufnr = buf,
+                lnum = 2,
+                message = "hello-great-explanation * * * * *\n",
+                namespace = ns,
+                severity = 4,
+            },
+            {
+                bufnr = buf,
+                lnum = 4,
+                message = "hello-great-explanation 1 * * 1 * *\n",
+                namespace = ns,
+                severity = 4,
+            },
+        }
+        table.sort(expected, function(a, b)
+            return a.lnum < b.lnum
+        end)
+        assert.are.same(got, expected)
         -- Deactivating plugin should remove Diagnostics
         vim.cmd("CronExplainedDisable")
         assert.are.same(vim.diagnostic.get(buf), {})
