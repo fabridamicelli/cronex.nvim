@@ -15,11 +15,11 @@ describe("acceptance: ", function()
         local cronex = require("cronex")
         cronex.setup({
             explainer = {
-                cmd = { "echo", "great-explanation" }
+                cmd = { "echo", "great-explanation" },
             },
             format = function(explanation)
                 return "hello-" .. explanation
-            end
+            end,
         })
         vim.cmd("CronExplainedEnable")
 
@@ -39,23 +39,28 @@ describe("acceptance: ", function()
                 lnum = diag.lnum,
                 message = diag.message,
                 namespace = diag.namespace,
-                severity = diag.severity
-            }
-            )
+                severity = diag.severity,
+            })
         end
-        assert.are.same(got, { {
-            bufnr = buf,
-            lnum = 2,
-            message = "hello-great-explanation * * * * *\n",
-            namespace = ns,
-            severity = 4
-        }, {
-            bufnr = buf,
-            lnum = 4,
-            message = "hello-great-explanation 1 * * 1 * *\n",
-            namespace = ns,
-            severity = 4
-        } })
+        assert.are.same(
+            got,
+            {
+                {
+                    bufnr = buf,
+                    lnum = 2,
+                    message = "hello-great-explanation * * * * *\n",
+                    namespace = ns,
+                    severity = 4,
+                },
+                {
+                    bufnr = buf,
+                    lnum = 4,
+                    message = "hello-great-explanation 1 * * 1 * *\n",
+                    namespace = ns,
+                    severity = 4,
+                },
+            }
+        )
         -- Deactivating plugin should remove Diagnostics
         vim.cmd("CronExplainedDisable")
         assert.are.same(vim.diagnostic.get(buf), {})

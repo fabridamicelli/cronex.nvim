@@ -10,7 +10,7 @@ describe("acceptance: ", function()
                 -- args: 1) seconds 2) message to echo
                 -- sleep 50 milliseconds and echo message
                 cmd = { "bash", "scripts/tests/sleep_and_echo.sh", "0.05", "shouldn't show up" },
-                timeout = 40 -- timeout after 40 milliseconds
+                timeout = 40, -- timeout after 40 milliseconds
             },
         })
 

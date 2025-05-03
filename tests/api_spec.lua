@@ -42,14 +42,15 @@ describe("api - exposed ui: ", function()
         vim.cmd("CronExplainedDisable")
         -- Trying to grab a non-existing group (expected behaviour as a result of CronExplainedDisable)
         -- throws an error, so we just catch that one here
-        assert.has.errors(
-            function()
-                local _, err = pcall(function() vim.api.nvim_get_autocmds({ group = g }) end)
-                if err ~= nil then
-                    local msg = string.match(err, "Invalid 'group':")
-                    error(msg)
-                end
-            end, "Invalid 'group':")
+        assert.has.errors(function()
+            local _, err = pcall(function()
+                vim.api.nvim_get_autocmds({ group = g })
+            end)
+            if err ~= nil then
+                local msg = string.match(err, "Invalid 'group':")
+                error(msg)
+            end
+        end, "Invalid 'group':")
 
         -- Re-activating plugin should make commands available again
         vim.cmd("CronExplainedEnable")
@@ -59,12 +60,11 @@ describe("api - exposed ui: ", function()
     end)
 
     it("Calling CronExplainedDisable when already disabled throws no error", function()
-        assert.has_no.errors(
-            function()
-                vim.cmd("CronExplainedDisable")
-                vim.cmd("CronExplainedDisable")
-                vim.cmd("CronExplainedDisable")
-            end)
+        assert.has_no.errors(function()
+            vim.cmd("CronExplainedDisable")
+            vim.cmd("CronExplainedDisable")
+            vim.cmd("CronExplainedDisable")
+        end)
     end)
 end)
 

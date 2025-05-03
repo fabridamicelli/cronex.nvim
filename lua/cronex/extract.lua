@@ -3,7 +3,6 @@
 
 local api = vim.api
 
-
 M = {}
 
 M.extract = function(cron_from_line)

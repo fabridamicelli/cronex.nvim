@@ -361,6 +361,7 @@ I haven't seen use-cases where it makes sense to have more than one, but I'd be 
 - If encountering problems with an expression, disable the format in order to see the exact output coming from the explainer
 
 ## TODO
+- add stylua linter
 - make screencast gif
 - Accept diagnostics config? (nvim 0.11)
 - add command timeout

@@ -8,7 +8,6 @@ local assert_all_eq = function(inputs, expected)
     end
 end
 
-
 describe("cron_from_line.cron_from_line - Invalid cron:", function()
     it("empty lines are nil", function()
         local lines = {
@@ -22,10 +21,10 @@ describe("cron_from_line.cron_from_line - Invalid cron:", function()
 
     it("naked crons are nil", function()
         local lines = {
-            '* * * * *',
-            '* * * * * *',
-            '* * * * * * *',
-            'cron: * * * * * *',
+            "* * * * *",
+            "* * * * * *",
+            "* * * * * * *",
+            "cron: * * * * * *",
         }
         assert_all_eq(lines, nil)
     end)
@@ -69,7 +68,6 @@ describe("cron_from_line.cron_from_line - Invalid cron:", function()
     end)
 end)
 
-
 describe("cron_from_line.cron_from_line - Valid cron:", function()
     it("extract pure cron", function()
         -- pairs (input, expected)
@@ -100,7 +98,6 @@ describe("cron_from_line.cron_from_line - Valid cron:", function()
             ["cron: '* * * * *'"] = "* * * * *",
             ["cron: '* * * * * *'"] = "* * * * * *",
             ["cron: '* * * * * * *'"] = "* * * * * * *",
-
         }
         for inp, exp in pairs(items) do
             eq(cron_from_line(inp), exp)
@@ -117,7 +114,6 @@ describe("cron_from_line.cron_from_line - Valid cron:", function()
             ["cron: ' * * * * *'"] = "* * * * *",
             ["cron: ' * * * * * *'"] = "* * * * * *",
             ["cron: ' * * * * * * *'"] = "* * * * * * *",
-
         }
         for inp, exp in pairs(items) do
             eq(cron_from_line(inp), exp)
@@ -134,13 +130,11 @@ describe("cron_from_line.cron_from_line - Valid cron:", function()
             ["cron: '* * * * * '"] = "* * * * *",
             ["cron: '* * * * * * '"] = "* * * * * *",
             ["cron: '* * * * * * * '"] = "* * * * * * *",
-
         }
         for inp, exp in pairs(items) do
             eq(cron_from_line(inp), exp)
         end
     end)
-
 
     it("extract cron with numbers", function()
         local items = {
@@ -221,7 +215,7 @@ describe("cron_from_line.cron_from_line - Valid cron:", function()
             ["cron: '8,28,48 * * * *'"] = "8,28,48 * * * *",
             ["cron: '1,2,3 /3,5 2-4 2/2-3 2-5'"] = "1,2,3 /3,5 2-4 2/2-3 2-5",
             ["cron: '1,2,3 2,3,4 1,3,4 7 4,5,6'"] = "1,2,3 2,3,4 1,3,4 7 4,5,6",
-            ["cron: '1,22,33 2,3,4 1,3,4 7 4,5,6'"] = "1,22,33 2,3,4 1,3,4 7 4,5,6"
+            ["cron: '1,22,33 2,3,4 1,3,4 7 4,5,6'"] = "1,22,33 2,3,4 1,3,4 7 4,5,6",
         }
         for inp, exp in pairs(items) do
             eq(cron_from_line(inp), exp)
@@ -263,7 +257,6 @@ describe("cron_from_line.cron_from_line - Valid cron:", function()
             ["cron: '* * * * MON#3'"] = "* * * * MON#3",
             ["cron: '23 12 * * SUN#2'"] = "23 12 * * SUN#2",
             ["cron: '0 00 10 ? * MON-THU,SUN *'"] = "0 00 10 ? * MON-THU,SUN *",
-
         }
         for inp, exp in pairs(items) do
             eq(cron_from_line(inp), exp)
