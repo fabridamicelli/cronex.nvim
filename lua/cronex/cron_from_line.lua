@@ -5,10 +5,11 @@ Here's the logic extract cron expression from each line using regex + simple par
 
 local M = {}
 
+
 --Define s to match cronexp in a line. One of three possible lengths (7,6,5)
-local first = "['\"]%s?[%d%-%/%*,]+%s" -- Should we allow letters here too?
-local part = "[%a%d%-%/%*,%?#]+%s"
-local last = "[%a%d%-%/%*,%?#]+%s?['\"]"
+local first = '[\'"]%s?[%d%-%/%*,]+%s' -- Should we allow letters here too?
+local part = '[%a%d%-%/%*,%?#]+%s'
+local last = '[%a%d%-%/%*,%?#]+%s?[\'"]'
 local nparts2pat = {
     [7] = first .. part .. part .. part .. part .. part .. last,
     [6] = first .. part .. part .. part .. part .. last,
@@ -18,7 +19,7 @@ local nparts2pat = {
 local get_cron_for_pat = function(line, pat)
 	-- Only allow 1 expression per line
 	local n_quotes = 0
-	for _ in string.gmatch(line, "['\"]") do
+	for _ in string.gmatch(line, '[\'"]') do
 		n_quotes = n_quotes + 1
 	end
 	if n_quotes > 2 then
@@ -40,7 +41,7 @@ local get_cron_for_pat = function(line, pat)
 	local clean = ""
 	for i = 1, #match do
 		local c = string.sub(match, i, i)
-		if c ~= "'" and c ~= '"' then
+		if c ~= "\'" and c ~= "\"" then
 			clean = clean .. c
 		end
 	end
@@ -69,38 +70,38 @@ end
 
 -- Patterns for standard crontab format (no quotes)
 local crontab_patterns = {
-	-- Standard 5-part cron expression (minute hour day month weekday)
-	"^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
-	-- Special time strings like @daily, @hourly, etc.
-	"^%s*(@%w+)%s",
+    -- Standard 5-part cron expression (minute hour day month weekday)
+    "^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
+    -- Special time strings like @daily, @hourly, etc.
+    "^%s*(@%w+)%s"
 }
 
 -- Extract cron expression from crontab format without quotes
 M.cron_from_line_crontab = function(line)
-	-- Skip comments and empty lines
-	if line:match("^%s*#") or line:match("^%s*$") then
-		return nil
-	end
-
-	-- First try the standard method in case it has quotes
-	local quoted_match = M.cron_from_line(line)
-	if quoted_match then
-		return quoted_match
-	end
-
-	-- Check for standard 5-part cron expression
-	local min, hour, day, month, weekday = line:match(crontab_patterns[1])
-	if min and hour and day and month and weekday then
-		return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
-	end
-
-	-- Check for special time strings
-	local special = line:match(crontab_patterns[2])
-	if special then
-		return special
-	end
-
-	return nil
+    -- Skip comments and empty lines
+    if line:match("^%s*#") or line:match("^%s*$") then
+        return nil
+    end
+    
+    -- First try the standard method in case it has quotes
+    local quoted_match = M.cron_from_line(line)
+    if quoted_match then
+        return quoted_match
+    end
+    
+    -- Check for standard 5-part cron expression
+    local min, hour, day, month, weekday = line:match(crontab_patterns[1])
+    if min and hour and day and month and weekday then
+        return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
+    end
+    
+    -- Check for special time strings
+    local special = line:match(crontab_patterns[2])
+    if special then
+        return special
+    end
+    
+    return nil
 end
 
 return M
