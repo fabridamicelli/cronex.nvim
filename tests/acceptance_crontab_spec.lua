@@ -60,8 +60,8 @@ describe("acceptance: crontab file pattern", function()
             local ns = vim.api.nvim_get_namespaces()["plugin-cronex.nvim"]
             assert.is_not_nil(ns, "Plugin namespace should exist")
 
-            -- Get diagnostics
-            local diags = vim.diagnostic.get(buf)
+            -- Get diagnostics for the plugin namespace
+            local diags = vim.diagnostic.get(buf, { namespace = ns })
             assert.is_not_nil(diags, "Diagnostics should exist")
             assert.is_true(#diags > 0, "Should have diagnostics for cron line")
 
@@ -76,7 +76,7 @@ describe("acceptance: crontab file pattern", function()
 
             -- Verify cleanup works
             vim.cmd("CronExplainedDisable")
-            local after_diags = vim.diagnostic.get(buf)
+            local after_diags = vim.diagnostic.get(buf, { namespace = ns })
             assert.are.same({}, after_diags, "Diagnostics should be cleared after disabling")
         end)
 
@@ -91,7 +91,12 @@ describe("acceptance: crontab file pattern", function()
 
             -- Set buffer and check no diagnostics yet
             vim.api.nvim_set_current_buf(buf)
-            local before_diags = vim.diagnostic.get(buf)
+
+            -- Get plugin namespace
+            local ns = vim.api.nvim_get_namespaces()["plugin-cronex.nvim"]
+            assert.is_not_nil(ns, "Plugin namespace should exist")
+
+            local before_diags = vim.diagnostic.get(buf, { namespace = ns })
             assert.are.same({}, before_diags, "Should have no diagnostics before enabling")
 
             -- Manually enable
@@ -99,7 +104,7 @@ describe("acceptance: crontab file pattern", function()
             wait()
 
             -- Check diagnostics after manual enable
-            local after_diags = vim.diagnostic.get(buf)
+            local after_diags = vim.diagnostic.get(buf, { namespace = ns })
             assert.is_true(#after_diags > 0, "Should have diagnostics after manual enable")
         end)
     end)
@@ -159,8 +164,12 @@ describe("acceptance: crontab file pattern", function()
             -- Wait for async operations to complete
             wait()
 
-            -- Get diagnostics
-            local diags = vim.diagnostic.get(unquoted_buf)
+            -- Get plugin namespace
+            local ns = vim.api.nvim_get_namespaces()["plugin-cronex.nvim"]
+            assert.is_not_nil(ns, "Plugin namespace should exist")
+
+            -- Get diagnostics for the plugin namespace
+            local diags = vim.diagnostic.get(unquoted_buf, { namespace = ns })
             assert.is_not_nil(diags, "Diagnostics should exist")
             assert.is_true(#diags > 0, "Should have diagnostics for cron lines")
 
@@ -195,28 +204,6 @@ describe("acceptance: crontab file pattern", function()
             end
         end)
 
-        it("Correctly parses 6-part cron expressions", function()
-            -- Test the cron_from_line_crontab function directly
-            local cron_from_line_crontab = require("cronex.cron_from_line").cron_from_line_crontab
-
-            -- 5-part expression
-            local five_part = "30 5 * * 1-5 /path/to/script"
-            local cron5 = cron_from_line_crontab(five_part)
-            assert.are.equal("30 5 * * 1-5", cron5)
-
-            -- 6-part expression (with seconds)
-            local six_part = "0 30 5 * * 1-5 /path/to/script"
-            local cron6 = cron_from_line_crontab(six_part)
-            assert.are.equal(
-                "30 5 * * 1-5",
-                cron6,
-                "6-part cron should return only the 5 standard parts excluding seconds"
-            )
-
-            -- Command that happens to have numbers that could be mistaken for cron parts
-            local cmd_with_numbers = "* * * * * 1 2 3 command"
-            local cron_cmd = cron_from_line_crontab(cmd_with_numbers)
-            assert.are.equal("* * * * 1", cron_cmd, "Should extract cron parts correctly")
-        end)
+        -- Detailed unit tests for cron_from_line_crontab are in cron_from_line_crontab_spec.lua
     end)
 end)
