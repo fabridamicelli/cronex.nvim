@@ -60,19 +60,17 @@ describe("acceptance: crontab file pattern", function()
             local ns = vim.api.nvim_get_namespaces()["plugin-cronex.nvim"]
             assert.is_not_nil(ns, "Plugin namespace should exist")
 
-            -- Get diagnostics for the plugin namespace
+            -- Get diagnostics for the plugin namespace and verify them
             local diags = vim.diagnostic.get(buf, { namespace = ns })
-            assert.is_not_nil(diags, "Diagnostics should exist")
-            assert.is_true(#diags > 0, "Should have diagnostics for cron line")
+            assert.is_true(#diags == 1, "Should have exactly 1 diagnostic for our single cron line")
 
             -- Verify the diagnostic is on the correct line and has expected content
-            local cron_diag = diags[1]
-            assert.are.equal(0, cron_diag.lnum, "Diagnostic should be on the first line")
+            assert.are.equal(0, diags[1].lnum, "Diagnostic should be on the first line")
             assert.truthy(
-                string.match(cron_diag.message, "test%-explanation"),
+                string.match(diags[1].message, "test%-explanation"),
                 "Diagnostic message should contain explainer output"
             )
-            assert.are.equal(ns, cron_diag.namespace, "Diagnostic should be in the plugin namespace")
+            assert.are.equal(ns, diags[1].namespace, "Diagnostic should be in the plugin namespace")
 
             -- Verify cleanup works
             vim.cmd("CronExplainedDisable")
