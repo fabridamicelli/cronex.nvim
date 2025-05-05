@@ -67,15 +67,49 @@ M.cron_from_line = function(line)
     return nil
 end
 
--- Patterns for standard crontab format (no quotes)
-local crontab_patterns = {
-    -- Standard 5-part cron expression (minute hour day month weekday)
-    "^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s",
-    -- Special time strings like @daily, @hourly, etc.
-    "^%s*(@%w+)%s",
+-- Helper function to convert a string to a case-insensitive pattern
+local function ci(str)
+    local result = ""
+    for i = 1, #str do
+        local c = str:sub(i, i)
+        result = result .. "[" .. c:upper() .. c:lower() .. "]"
+    end
+    return result
+end
+
+-- Patterns for field validation
+local month_names = {
+    ci("JAN"),
+    ci("FEB"),
+    ci("MAR"),
+    ci("APR"),
+    ci("MAY"),
+    ci("JUN"),
+    ci("JUL"),
+    ci("AUG"),
+    ci("SEP"),
+    ci("OCT"),
+    ci("NOV"),
+    ci("DEC"),
 }
 
--- Extract cron expression from crontab format without quotes
+local weekday_names = {
+    ci("SUN"),
+    ci("MON"),
+    ci("TUE"),
+    ci("WED"),
+    ci("THU"),
+    ci("FRI"),
+    ci("SAT"),
+}
+
+-- Special time strings like @daily, @hourly, etc.
+local special_pattern = "^%s*(@%w+)%s"
+
+-- Parse and extract cron expressions from standard crontab format
+-- According to crontab(5) spec:
+-- - Supports standard 5-part and 6-part (with seconds) cron expressions
+-- - Handles three-letter month and day names (case-insensitive)
 M.cron_from_line_crontab = function(line)
     -- Skip comments and empty lines
     if line:match("^%s*#") or line:match("^%s*$") then
@@ -88,25 +122,91 @@ M.cron_from_line_crontab = function(line)
         return quoted_match
     end
 
-    -- Check for cron with 6 parts (some implementations add seconds)
-    local six_part_pattern =
-        "^%s*([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s+([%d%*%-%/,]+)%s"
-    local sec, min_six, hour_six, day_six, month_six, weekday_six = line:match(six_part_pattern)
-    if sec and min_six and hour_six and day_six and month_six and weekday_six then
-        -- For 6-part cron, return only the standard 5 parts (ignore seconds)
-        return min_six .. " " .. hour_six .. " " .. day_six .. " " .. month_six .. " " .. weekday_six
-    end
-
-    -- Check for standard 5-part cron expression
-    local min, hour, day, month, weekday = line:match(crontab_patterns[1])
-    if min and hour and day and month and weekday then
-        return min .. " " .. hour .. " " .. day .. " " .. month .. " " .. weekday
-    end
-
     -- Check for special time strings
-    local special = line:match(crontab_patterns[2])
+    local special = line:match(special_pattern)
     if special then
         return special
+    end
+
+    -- Split line by whitespace to get parts
+    local parts = {}
+    for part in line:gmatch("%S+") do
+        table.insert(parts, part)
+    end
+
+    -- Need at least 5 parts for a valid cron expression
+    if #parts < 5 then
+        return nil
+    end
+
+    -- Pattern for standard cron fields (numeric, *, -, /, ,)
+    local is_standard_part = function(part)
+        return part:match("^[%d%*%-%/,]+$") ~= nil
+    end
+
+    -- Check if a part matches a name in the provided list
+    local is_valid_name = function(part, name_patterns)
+        -- As per crontab(5): "Ranges or lists of names are not allowed"
+        if part:match("[-,]") then
+            return false
+        end
+
+        for _, pattern in ipairs(name_patterns) do
+            if part:match("^" .. pattern .. "$") then
+                return true
+            end
+        end
+        return false
+    end
+
+    -- Function to check if a part matches the expected format for its position
+    local is_valid_part = function(part, pos)
+        -- Minutes, hours, day of month - must be numeric format
+        if pos <= 3 then
+            return is_standard_part(part)
+        -- Month - can be numeric or month name
+        elseif pos == 4 then
+            return is_standard_part(part) or is_valid_name(part, month_names)
+        -- Day of week - can be numeric or weekday name
+        elseif pos == 5 then
+            return is_standard_part(part) or is_valid_name(part, weekday_names)
+        end
+        return false
+    end
+
+    -- Format for returning matched parts
+    local format_parts = function(offset, count)
+        local result = parts[offset]
+        for i = 1, count - 1 do
+            result = result .. " " .. parts[offset + i]
+        end
+        return result
+    end
+
+    -- Check for 6-part cron format (with seconds)
+    if #parts >= 6 then
+        local valid = true
+        valid = valid and is_standard_part(parts[1]) -- seconds
+
+        -- Validate remaining 5 standard parts
+        for i = 1, 5 do
+            valid = valid and is_valid_part(parts[i + 1], i)
+        end
+
+        if valid then
+            -- Return standard 5-part format, skipping seconds
+            return format_parts(2, 5)
+        end
+    end
+
+    -- Check for 5-part cron format
+    local valid = true
+    for i = 1, 5 do
+        valid = valid and is_valid_part(parts[i], i)
+    end
+
+    if valid then
+        return format_parts(1, 5)
     end
 
     return nil
