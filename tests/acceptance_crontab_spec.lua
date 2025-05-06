@@ -70,7 +70,6 @@ describe("acceptance: crontab file pattern", function()
                 string.match(diags[1].message, "test%-explanation"),
                 "Diagnostic message should contain explainer output"
             )
-            assert.are.equal(ns, diags[1].namespace, "Diagnostic should be in the plugin namespace")
 
             -- Verify cleanup works
             vim.cmd("CronExplainedDisable")

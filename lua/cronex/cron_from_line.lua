@@ -77,31 +77,39 @@ local function ci(str)
     return result
 end
 
--- Patterns for field validation
-local month_names = {
-    ci("JAN"),
-    ci("FEB"),
-    ci("MAR"),
-    ci("APR"),
-    ci("MAY"),
-    ci("JUN"),
-    ci("JUL"),
-    ci("AUG"),
-    ci("SEP"),
-    ci("OCT"),
-    ci("NOV"),
-    ci("DEC"),
-}
+local function make_patterns(names)
+    local patterns = {}
+    for _, name in pairs(names) do
+        table.insert(patterns, "^" .. ci(name) .. "$")
+    end
+    return patterns
+end
 
-local weekday_names = {
-    ci("SUN"),
-    ci("MON"),
-    ci("TUE"),
-    ci("WED"),
-    ci("THU"),
-    ci("FRI"),
-    ci("SAT"),
-}
+-- Patterns for field validation
+local month_names_patterns = make_patterns({
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC",
+})
+
+local weekday_names_patterns = make_patterns({
+    "SUN",
+    "MON",
+    "TUE",
+    "WED",
+    "THU",
+    "FRI",
+    "SAT",
+})
 
 -- Special time strings like @daily, @hourly, etc.
 local special_pattern = "^%s*(@%w+)%s"
@@ -144,15 +152,15 @@ M.cron_from_line_crontab = function(line)
         return part:match("^[%d%*%-%/,]+$") ~= nil
     end
 
-    -- Check if a part matches a name in the provided list
-    local is_valid_name = function(part, name_patterns)
+    -- Check if a part matches a name in the provided list of patterns
+    local is_valid_name = function(part, patterns)
         -- As per crontab(5): "Ranges or lists of names are not allowed"
         if part:match("[-,]") then
             return false
         end
 
-        for _, pattern in ipairs(name_patterns) do
-            if part:match("^" .. pattern .. "$") then
+        for _, pattern in ipairs(patterns) do
+            if part:match(pattern) then
                 return true
             end
         end
@@ -166,10 +174,10 @@ M.cron_from_line_crontab = function(line)
             return is_standard_part(part)
         -- Month - can be numeric or month name
         elseif pos == 4 then
-            return is_standard_part(part) or is_valid_name(part, month_names)
+            return is_standard_part(part) or is_valid_name(part, month_names_patterns)
         -- Day of week - can be numeric or weekday name
         elseif pos == 5 then
-            return is_standard_part(part) or is_valid_name(part, weekday_names)
+            return is_standard_part(part) or is_valid_name(part, weekday_names_patterns)
         end
         return false
     end

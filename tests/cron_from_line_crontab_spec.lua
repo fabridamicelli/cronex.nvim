@@ -96,9 +96,19 @@ describe("cron_from_line_crontab", function()
         assert.are.equal("30 2 * * sat", cron_from_line_crontab("30 2 * * sat command"))
         assert.are.equal("30 2 * * sun", cron_from_line_crontab("30 2 * * sun command"))
         
-        -- Additional test cases from previous tests
+        -- Test mixed-case day of week names
+        assert.are.equal("30 2 * * Mon", cron_from_line_crontab("30 2 * * Mon command"))
+        assert.are.equal("30 2 * * Tue", cron_from_line_crontab("30 2 * * Tue command"))
+        assert.are.equal("30 2 * * Wed", cron_from_line_crontab("30 2 * * Wed command"))
+        assert.are.equal("30 2 * * Thu", cron_from_line_crontab("30 2 * * Thu command"))
+        assert.are.equal("30 2 * * Fri", cron_from_line_crontab("30 2 * * Fri command"))
+        assert.are.equal("30 2 * * Sat", cron_from_line_crontab("30 2 * * Sat command"))
+        assert.are.equal("30 2 * * Sun", cron_from_line_crontab("30 2 * * Sun command"))
+        
+        -- Additional test cases with context
         assert.are.equal("1 14 * * TUE", cron_from_line_crontab("1 14 * * TUE cd ./root_dir && command"))
         assert.are.equal("0 0 * * SUN", cron_from_line_crontab("0 0 * * SUN weekly job"))
+        assert.are.equal("45 18 * * Fri", cron_from_line_crontab("45 18 * * Fri run weekend backup"))
     end)
 
     it("Handles month names", function()
