@@ -147,6 +147,8 @@ require('cronex').setup{
 EOF
 ```
 
+Look [here](/examples) for more config examples.
+
 ### Extractor
 Logic of the default extractor can be found here in `/cronex/cron_from_line.lua`.  
 Default extractor searches for at most 1 expression per line of length 7, 6 or 5 (in that order).  
