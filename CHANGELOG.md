@@ -1,3 +1,12 @@
+## 0.3.0 (2025-05-08)
+## Feat
+- Add support for `crontab` format by @kylesnowschwartz #8 : Implement `cron_from_line_crontab` to parse format `cron cmd`.
+
+See [this example config](https://github.com/fabridamicelli/cronex.nvim/blob/main/examples/crontab_config.lua)
+
+## 0.2.1 (2025-05-03)
+Improve test coverage and documentation.
+
 ## 0.2.0 (2025-04-29)
 
 ### Breaking changes
