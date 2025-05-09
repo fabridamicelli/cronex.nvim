@@ -241,8 +241,8 @@ M.cron_from_line_crontab = function(line)
         end
 
         if valid then
-            -- Return standard 5-part format, skipping seconds
-            return format_parts(2, 5)
+            -- Return all 6 parts, including seconds
+            return format_parts(1, 6)
         end
     end
 

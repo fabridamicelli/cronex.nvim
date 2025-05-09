@@ -63,32 +63,49 @@ describe("cron_from_line_crontab", function()
 
     it("Handles 6-part cron expressions (with seconds)", function()
         assert.are.equal(
-            "30 5 * * 1-5",
+            "0 30 5 * * 1-5",
             cron_from_line_crontab("0 30 5 * * 1-5 /path/to/script"),
-            "Should extract minutes through weekday, ignoring seconds"
+            "Should preserve seconds field in 6-part format"
         )
         assert.are.equal(
-            "0 0 * * *",
+            "10 30 5 * * 1-5",
+            cron_from_line_crontab("10 30 5 * * 1-5 /path/to/script"),
+            "Should preserve seconds field in 6-part format"
+        )
+        assert.are.equal(
+            "30 0 0 * * *",
             cron_from_line_crontab("30 0 0 * * * midnight job with 30s"),
-            "Should extract standard 5 parts correctly"
+            "Should preserve seconds in 6-part format"
         )
         assert.are.equal(
-            "*/15 * * * *",
+            "0 */15 * * * *",
             cron_from_line_crontab("0 */15 * * * * every 15 minutes"),
-            "Should handle special chars in cron parts"
+            "Should handle special chars in cron parts with seconds"
+        )
+        -- Test 6-part with comma-delimited day names
+        assert.are.equal(
+            "0 30 5 * * MON,WED,FRI",
+            cron_from_line_crontab("0 30 5 * * MON,WED,FRI run command"),
+            "Should handle comma-delimited day names in 6-part format"
+        )
+        -- Test 6-part with day name ranges
+        assert.are.equal(
+            "0 30 5 * * MON-FRI",
+            cron_from_line_crontab("0 30 5 * * MON-FRI run command"),
+            "Should handle day name ranges in 6-part format"
         )
     end)
 
     it("Handles cron expressions with trailing command parts containing numbers", function()
         assert.are.equal(
-            "* * * * 1",
+            "* * * * * 1",
             cron_from_line_crontab("* * * * * 1 2 3"),
-            "Should extract only the first 5 parts, but the pattern is capturing the first number after the weekday"
+            "Should extract all 6 parts for 6-part cron"
         )
         assert.are.equal(
             "30 5 * * 1-5",
             cron_from_line_crontab("30 5 * * 1-5 run command with 42 numbers"),
-            "Should not be confused by numbers in command"
+            "Should not be confused by numbers in command for 5-part cron"
         )
     end)
 
@@ -152,16 +169,10 @@ describe("cron_from_line_crontab", function()
         )
 
         -- Test partial week
-        assert.are.equal(
-            "30 2 * * MON,WED,FRI",
-            cron_from_line_crontab("30 2 * * MON,WED,FRI command")
-        )
+        assert.are.equal("30 2 * * MON,WED,FRI", cron_from_line_crontab("30 2 * * MON,WED,FRI command"))
 
         -- Test two days
-        assert.are.equal(
-            "30 2 * * SAT,SUN",
-            cron_from_line_crontab("30 2 * * SAT,SUN weekend command")
-        )
+        assert.are.equal("30 2 * * SAT,SUN", cron_from_line_crontab("30 2 * * SAT,SUN weekend command"))
 
         -- Test with other parts of cron expression
         assert.are.equal(

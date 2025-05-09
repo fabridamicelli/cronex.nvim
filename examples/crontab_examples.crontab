@@ -1,0 +1,51 @@
+  # Standard crontab formats
+  * * * * * echo "Every minute"
+  0 * * * * echo "Every hour"
+  30 5 * * * echo "5:30 AM daily"
+
+  # Numeric ranges
+  0 8-17 * * * echo "Every hour during work hours (8 AM-5 PM)"
+  */15 8-17 * * * echo "Every 15 minutes during work hours"
+  0 0 1-15 * * echo "Midnight on the first half of the month"
+
+  # Special time strings
+  @daily echo "Run once a day at midnight"
+  @hourly echo "Run once an hour"
+  @weekly echo "Run once a week (Sunday at midnight)"
+  @monthly echo "Run once a month (midnight on the 1st)"
+  @yearly echo "Run once a year (midnight on Jan 1)"
+  @reboot echo "Run at startup"
+
+  # Day of week names
+  30 2 * * MON echo "2:30 AM every Monday"
+  45 18 * * Fri echo "6:45 PM every Friday"
+  0 9 * * Mon-Fri echo "9 AM Monday through Friday"
+
+  # Comma-delimited day of week names
+  0 8 * * MON,WED,FRI echo "8 AM on Monday, Wednesday, and Friday"
+  0 17 * * Sat,Sun echo "5 PM on weekends"
+
+  # Month names
+  15 12 1 JAN * echo "12:15 PM on January 1st"
+  0 0 1 JAN,APR,JUL,OCT * echo "Midnight on the first day of each quarter"
+  0 12 * Jan-Mar * echo "Noon every day in Q1"
+
+  # Combined formats
+  0 8 1-7 * MON echo "8 AM on Mondays that fall on the 1st-7th of any month"
+  30 9 1 JAN-JUN MON-FRI echo "9:30 AM on weekdays that are the 1st of Jan-Jun"
+  0-59/15 8-17 * * MON,WED,FRI echo "Every 15 min during business hours on M,W,F"
+
+  # Complex examples
+  0 0 1,15 * * echo "Midnight on the 1st and 15th of every month"
+  5,35 8-16/2 * * * echo "5 and 35 min past the hour, every other hour, 8AM-4PM"
+  0 9 * * 1-5 echo "9 AM on weekdays (using numeric day of week)"
+
+  # 6-part cron expressions (with seconds)
+  0 * * * * * echo "Every minute, at 0 seconds"
+  30 0 * * * * echo "Every hour, at 30 seconds past the minute"
+  10 30 5 * * * echo "5:30:10 AM daily"
+
+  # Numeric ranges in seconds
+  0-30 0 8-17 * * * echo "First 30 seconds of each hour during work hours (8 AM-5 PM)"
+  */10 */15 8-17 * * * echo "Every 10 seconds, every 15 minutes during work hours"
+  5 0 0 1-15 * * echo "5 seconds after midnight on the first half of the month"
