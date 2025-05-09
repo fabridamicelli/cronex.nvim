@@ -154,11 +154,50 @@ M.cron_from_line_crontab = function(line)
 
     -- Check if a part matches a name in the provided list of patterns
     local is_valid_name = function(part, patterns)
-        -- As per crontab(5): "Ranges or lists of names are not allowed"
-        if part:match("[-,]") then
+        -- Handle comma-separated list of names
+        if part:match(",") then
+            local valid = true
+            for name in part:gmatch("([^,]+)") do
+                local name_valid = false
+                for _, pattern in ipairs(patterns) do
+                    if name:match(pattern) then
+                        name_valid = true
+                        break
+                    end
+                end
+                valid = valid and name_valid
+            end
+            return valid
+        end
+
+        -- Handle range of names (e.g., MON-FRI)
+        if part:match("%-") then
+            local start_name, end_name = part:match("([^-]+)%-([^-]+)")
+
+            if start_name and end_name then
+                local start_index, end_index = nil, nil
+                local start_valid, end_valid = false, false
+
+                -- Find indices for both names
+                for i, pattern in ipairs(patterns) do
+                    if start_name:match(pattern) then
+                        start_index = i
+                        start_valid = true
+                    end
+                    if end_name:match(pattern) then
+                        end_index = i
+                        end_valid = true
+                    end
+                end
+
+                -- Only valid if both names exist and form a correct range
+                return start_valid and end_valid and start_index and end_index and start_index <= end_index
+            end
+
             return false
         end
 
+        -- Handle single name
         for _, pattern in ipairs(patterns) do
             if part:match(pattern) then
                 return true
@@ -202,8 +241,8 @@ M.cron_from_line_crontab = function(line)
         end
 
         if valid then
-            -- Return standard 5-part format, skipping seconds
-            return format_parts(2, 5)
+            -- Return all 6 parts, including seconds
+            return format_parts(1, 6)
         end
     end
 
