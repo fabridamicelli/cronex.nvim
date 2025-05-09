@@ -22,7 +22,7 @@ You can use any of those with Cronex.
 ## Getting Started
 ### Dependencies
 Since version 0.2.0, `cronex.nvim` depends on `Neovim >= v0.10`.
-If you're using `Neovim v0.9.*` pin `cronex to 0.1.*` (see below under `Installation`).
+If you're using `Neovim v0.9.*` pin `cronex to 0.1.3` (see below under `Installation`).
 
 
 You will need a cron expression explainer installed.
@@ -56,7 +56,7 @@ If you are using `Neovim v0.9.*`, tag to earlier versions like so:
 -- init.lua:
 {
 'fabridamicelli/cronex.nvim',
-tag = "0.1.*",
+tag = "0.1.3",
 opts = {}, 
 }
 ```
