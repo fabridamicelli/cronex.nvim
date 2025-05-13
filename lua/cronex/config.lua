@@ -40,8 +40,12 @@ M.parse_opts = function(opts)
     local explain = function(cron, lnum, bufnr, explanations, ns)
         local cmd = vim.iter({ opts.explainer.cmd, opts.explainer.args }):flatten():totable()
         local explain_module = require("cronex.explain")
-        -- Set max processes from config
-        explain_module.set_max_processes(opts.explainer.max_concurrent)
+        
+        -- Set up the explainer module with configuration
+        explain_module.setup({
+            max_processes = opts.explainer.max_concurrent
+        })
+        
         explain_module.explain(cmd, opts.explainer.timeout, cron, opts.format, bufnr, lnum, ns, explanations)
     end
 

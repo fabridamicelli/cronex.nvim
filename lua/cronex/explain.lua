@@ -1,12 +1,14 @@
 local M = {}
 
+-- Module configuration
+M._config = {
+    max_processes = 50, -- Default concurrent process limit
+}
+
 -- Private state
 M._cache = {}
-
--- Process queue to limit concurrent processes
 M._queue = {}
 M._active_processes = 0
-M._max_processes = 50 -- Default, will be overridden by config
 
 local append_explanation = function(explanations, explanation, bufnr, lnum)
     table.insert(explanations, {
@@ -91,18 +93,20 @@ end
 
 -- Process next item in the queue
 M.process_next = function()
-    if #M._queue > 0 and M._active_processes < M._max_processes then
+    if #M._queue > 0 and M._active_processes < M._config.max_processes then
         M._active_processes = M._active_processes + 1
         local next_item = table.remove(M._queue, 1)
         process_item(next_item)
     end
 end
 
----@param max_processes number|nil Maximum number of concurrent processes (default: 50)
+---@param config table Configuration options for the explainer
+---@field max_processes number|nil Maximum number of concurrent processes (default: 50)
 ---@return nil
---- Set the maximum number of concurrent processes to avoid "too many open files" errors
-M.set_max_processes = function(max_processes)
-    M._max_processes = max_processes or 50
+--- Initialize the explainer module with configuration options
+M.setup = function(config)
+    config = config or {}
+    M._config.max_processes = config.max_processes or M._config.max_processes
 end
 
 ---@param cmd table Command to run for explanation
