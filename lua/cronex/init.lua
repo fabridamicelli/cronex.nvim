@@ -5,16 +5,23 @@ local augroup_name = "plugin-cronex.nvim"
 local augroup = api.nvim_create_augroup(augroup_name, { clear = true })
 local ns = api.nvim_create_namespace(augroup_name)
 
--- Utility to debounce a function
+---@param fn function The function to debounce
+---@param ms number Debounce delay in milliseconds
+---@return function The debounced function
+--- Utility to debounce a function
+--- Returns a new function that will only execute after the specified delay
+--- and cancels any pending executions when called again
 local function debounce(fn, ms)
     local timer = nil
     return function(...)
         local args = {...}
+        -- Cancel pending execution if any
         if timer then
             vim.loop.timer_stop(timer)
             timer = nil
         end
         
+        -- Schedule new execution
         timer = vim.defer_fn(function()
             timer = nil
             fn(unpack(args))

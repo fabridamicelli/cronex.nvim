@@ -24,7 +24,15 @@ local schedule_explanations = function(explanations, ns, bufnr)
     end)
 end
 
--- Process an item from the queue
+---@param item table Process queue item containing all parameters needed for expression explanation
+---@field cmd table Command to run for explanation
+---@field timeout number Timeout in milliseconds
+---@field cron_expression string The cron expression to explain
+---@field format function Function to format the explanation
+---@field bufnr number Buffer number
+---@field lnum number Line number
+---@field ns number Namespace ID
+---@field explanations table Table of explanations to append to
 local function process_item(item)
     local cmd = item.cmd
     local timeout = item.timeout
@@ -90,12 +98,23 @@ M.process_next = function()
     end
 end
 
--- Set the maximum number of concurrent processes
+---@param max_processes number|nil Maximum number of concurrent processes (default: 50)
+---@return nil
+--- Set the maximum number of concurrent processes to avoid "too many open files" errors
 M.set_max_processes = function(max_processes)
     M._max_processes = max_processes or 50
 end
 
--- Explain a cron expression
+---@param cmd table Command to run for explanation
+---@param timeout number Timeout in milliseconds
+---@param cron_expression string The cron expression to explain
+---@param format function Function to format the explanation
+---@param bufnr number Buffer number
+---@param lnum number Line number
+---@param ns number Namespace ID
+---@param explanations table Table to store explanations
+--- Explain a cron expression using an external command
+--- Results are cached to avoid duplicate processing
 M.explain = function(cmd, timeout, cron_expression, format, bufnr, lnum, ns, explanations)
     -- Use cached result if available
     local cached = M._cache[cron_expression]
@@ -121,7 +140,9 @@ M.explain = function(cmd, timeout, cron_expression, format, bufnr, lnum, ns, exp
     vim.schedule(function() M.process_next() end)
 end
 
--- Clear the cache
+---@return nil
+--- Clear the expression explanation cache
+--- Call this when explanation behavior or formatting has changed
 M.clear_cache = function()
     M._cache = {}
 end
