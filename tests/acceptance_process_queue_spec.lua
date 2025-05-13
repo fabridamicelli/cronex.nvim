@@ -1,53 +1,79 @@
-describe("acceptance: ", function()
-    it("Successfully processes many cron expressions without 'too many open files' error", function()
+--- Tests for process queue and concurrency control mechanism
+describe("acceptance: process queue", function()
+    -- Setup and teardown to ensure clean state between tests
+    local original_system = nil
+    
+    before_each(function()
+        -- Save original function for restoration
+        original_system = vim.system
+    end)
+    
+    after_each(function()
+        -- Always restore the original system function
+        vim.system = original_system
+        -- Clean up any open buffers
+        vim.cmd("silent! %bdelete!")
+    end)
+    
+    it("respects max_concurrent setting to prevent 'too many open files' error", function()
         -- Create a test buffer with many cron expressions
         local buf = vim.api.nvim_create_buf(false, true)
         
-        -- Create 100 lines with cron expressions - this would normally
+        -- Constants for test configuration
+        local MAX_CONCURRENT = 10
+        local NUM_EXPRESSIONS = 100
+        
+        -- Create many lines with cron expressions - this would normally
         -- cause "too many open files" without our process queue system
         local lines = {}
-        for i = 1, 100 do
+        for i = 1, NUM_EXPRESSIONS do
             table.insert(lines, string.format("'%d * * * *' # test line %d", i % 60, i))
         end
         
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
         vim.api.nvim_set_current_buf(buf)
         
-        -- Mock the vim.system function to track calls
-        local original_system = vim.system
-        local call_count = 0
-        local max_concurrent = 0
-        local active_count = 0
-        local called_lines = {}
+        -- Test metrics
+        local metrics = {
+            call_count = 0,       -- Total number of calls made
+            max_concurrent = 0,   -- Maximum observed concurrent processes
+            active_count = 0,     -- Current active processes
+            called_lines = {}     -- List of processed cron expressions
+        }
         
-        -- Replace vim.system with our instrumented version
+        -- Mock implementation of vim.system that tracks concurrency
         vim.system = function(cmd, opts, on_exit)
-            call_count = call_count + 1
-            active_count = active_count + 1
-            max_concurrent = math.max(max_concurrent, active_count)
+            -- Track metrics
+            metrics.call_count = metrics.call_count + 1
+            metrics.active_count = metrics.active_count + 1
+            metrics.max_concurrent = math.max(metrics.max_concurrent, metrics.active_count)
             
-            -- Add the cron expression to our tracking
-            table.insert(called_lines, cmd[#cmd])
+            -- Track which cron expressions are processed
+            local cron_expression = cmd[#cmd]
+            table.insert(metrics.called_lines, cron_expression)
             
-            -- Schedule the completion to simulate async behavior
+            -- Simulate async behavior with small controlled delay
+            -- This creates enough concurrent operations to test queue behavior
             vim.defer_fn(function()
-                active_count = active_count - 1
+                -- Simulate process completion
+                metrics.active_count = metrics.active_count - 1
                 on_exit({
-                    stdout = "Test explanation for " .. cmd[#cmd],
+                    stdout = "Test explanation for " .. cron_expression,
                     stderr = "",
                     code = 0
                 })
             end, 5) -- Short timeout to make test run faster
             
-            return true
+            return true -- Match original function return value
         end
         
-        -- Set up cronex with a small max_concurrent value
+        -- Configure cronex with a deliberately small max_concurrent value
+        -- to exercise the concurrency limits
         require("cronex").setup({
             explainer = {
                 cmd = "echo",
                 args = {},
-                max_concurrent = 10, -- Limit to 10 concurrent processes
+                max_concurrent = MAX_CONCURRENT,
             }
         })
         
@@ -61,14 +87,27 @@ describe("acceptance: ", function()
         end, 1000)
         coroutine.yield()
         
-        -- Restore the original vim.system
-        vim.system = original_system
+        -- Assert that the process queue properly limited concurrency
+        assert.is_true(
+            metrics.max_concurrent <= MAX_CONCURRENT, 
+            string.format(
+                "Should respect max_concurrent limit of %d (got %d)", 
+                MAX_CONCURRENT,
+                metrics.max_concurrent
+            )
+        )
         
-        -- Assert that we respected the concurrent process limit
-        assert.is_true(max_concurrent <= 10, "Should respect max_concurrent limit")
+        -- Assert that all cron expressions were processed
+        assert.are.equal(
+            NUM_EXPRESSIONS, 
+            metrics.call_count, 
+            "All cron expressions should be processed"
+        )
         
-        -- Clean up
+        -- Disable plugin to clean up
         vim.cmd("CronExplainedDisable")
-        assert.are.same({}, vim.diagnostic.get(buf))
+        
+        -- Verify diagnostics were removed
+        assert.are.same({}, vim.diagnostic.get(buf), "Diagnostics should be cleared after disable")
     end)
 end)
