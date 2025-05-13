@@ -1,11 +1,9 @@
 local M = {}
 
--- Module configuration
 M._config = {
-    max_processes = 50, -- Default concurrent process limit
+    max_processes = 50,
 }
 
--- Private state
 M._cache = {}
 M._queue = {}
 M._active_processes = 0
@@ -46,7 +44,6 @@ local function process_item(item)
     local explanations = item.explanations
     
     local on_exit = function(obj)
-        -- Decrease active process count and process next item
         M._active_processes = M._active_processes - 1
         vim.schedule(function() M.process_next() end)
         
@@ -64,7 +61,6 @@ local function process_item(item)
 
         local data = obj.stdout
         if data ~= "" then
-            -- Update cache
             M._cache[cron_expression] = data
             append_explanation(explanations, format(data), bufnr, lnum)
             schedule_explanations(explanations, ns, bufnr)
@@ -91,7 +87,6 @@ local function process_item(item)
     }, on_exit)
 end
 
--- Process next item in the queue
 M.process_next = function()
     if #M._queue > 0 and M._active_processes < M._config.max_processes then
         M._active_processes = M._active_processes + 1
@@ -120,7 +115,6 @@ end
 --- Explain a cron expression using an external command
 --- Results are cached to avoid duplicate processing
 M.explain = function(cmd, timeout, cron_expression, format, bufnr, lnum, ns, explanations)
-    -- Use cached result if available
     local cached = M._cache[cron_expression]
     if cached then
         append_explanation(explanations, format(cached), bufnr, lnum)
@@ -128,7 +122,6 @@ M.explain = function(cmd, timeout, cron_expression, format, bufnr, lnum, ns, exp
         return
     end
     
-    -- Add to queue
     table.insert(M._queue, {
         cmd = cmd,
         timeout = timeout,
@@ -140,7 +133,6 @@ M.explain = function(cmd, timeout, cron_expression, format, bufnr, lnum, ns, exp
         explanations = explanations
     })
     
-    -- Try to process next item
     vim.schedule(function() M.process_next() end)
 end
 
