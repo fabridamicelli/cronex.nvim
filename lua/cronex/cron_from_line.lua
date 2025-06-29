@@ -6,10 +6,9 @@ Here's the logic extract cron expression from each line using regex + simple par
 local M = {}
 
 --Define s to match cronexp in a line. One of three possible lengths (7,6,5)
--- Allow specific letters used in cron: L (last), W (weekday), plus month/day names
-local first = "['\"]%s?[%d%-%/%*,]+%s" -- minute field: digits, ranges, wildcards
-local part = "[%a%d%-%/%*,%?#]+%s"     -- original pattern (we'll validate later)
-local last = "[%a%d%-%/%*,%?#]+%s?['\"]" -- original pattern
+local first = "['\"]%s?[%d%-%/%*,]+%s" -- Should we allow letters here too?
+local part = "[%a%d%-%/%*,%?#]+%s"
+local last = "[%a%d%-%/%*,%?#]+%s?['\"]"
 local nparts2pat = {
     [7] = first .. part .. part .. part .. part .. part .. last,
     [6] = first .. part .. part .. part .. part .. last,
@@ -84,10 +83,22 @@ local is_valid_cron_text = function(text)
     return temp == ""
 end
 
+-- Valid special cron expressions
+local valid_special_expressions = {
+    ["@yearly"] = true,
+    ["@annually"] = true,
+    ["@monthly"] = true,
+    ["@weekly"] = true,
+    ["@daily"] = true,
+    ["@midnight"] = true,
+    ["@hourly"] = true,
+    ["@reboot"] = true,
+}
+
 M.cron_from_line = function(line)
     -- First check for special expressions like @daily, @reboot, etc.
     local special = line:match("['\"]%s?(@[%w%-]+)%s?['\"]")
-    if special then
+    if special and valid_special_expressions[special] then
         return special
     end
     
