@@ -66,6 +66,67 @@ describe("cron_from_line.cron_from_line - Invalid cron:", function()
         }
         assert_all_eq(invalid_crons, nil)
     end)
+
+    it("YAML-like expressions with @include are nil", function()
+        local yaml_expressions = {
+            -- Direct @include patterns
+            '"@include"',
+            '"@include universal-constants.yml#Universal_Legend"',
+            '"@include flag-inheritance.yml#Universal_Always"',
+            "'@include universal-constants.yml#Universal_Legend'",
+            "'@include flag-inheritance.yml#Universal_Always'",
+            
+            -- Embedded in YAML structure
+            'Legend: "@include universal-constants.yml#Universal_Legend"',
+            'Flags: "@include flag-inheritance.yml#Universal_Always"',
+            
+            -- Expressions with invalid text that cronstrue errors on
+            '"2-5 pages for standard analysis"',
+            '"755 for dirs, 644 for files"',
+            '"for each file in directory"',
+            
+            -- Mixed invalid expressions
+            '"@see recovery-state-patterns.yml#Error_Classification"',
+            '"@see research-patterns.yml#Research_Validation"',
+        }
+        assert_all_eq(yaml_expressions, nil)
+    end)
+
+    it("Real-world YAML configuration lines are nil (integration test)", function()
+        -- These are actual lines from a YAML file that caused cronstrue errors
+        local real_yaml_lines = {
+            -- Lines that caused "Unknown special expression" error
+            '@include universal-constants.yml#Universal_Legend',
+            '  1_Purpose: "**Purpose**: Single sentence describing command function"',
+            '  2_Legend: "@include universal-constants.yml#Universal_Legend"',
+            '  5_Flags: "@include flag-inheritance.yml#Universal_Always"',
+            
+            -- Lines that caused "Expression contains invalid values: 'pages'" error
+            '    Articles: "Remove \'the|a|an\' where clear"',
+            '  2-5 pages for standard analysis.',
+            '    Overall: "~70% average reduction"',
+            
+            -- Lines that caused "Expression contains invalid values: 'for'" error  
+            '  755 for dirs, 644 for files.',
+            '    Verbose_Phrases: "\'in order to\'→\'to\' | \'make sure\'→\'ensure\'"',
+            '  Structure_Priority:',
+            '    1_YAML: "Most compact structured data"',
+            
+            -- Other YAML patterns that might be mistaken for cron
+            'Required_Sections:',
+            '  Analysis: ["analyze", "load", "explain", "troubleshoot"]',
+            '  Build: ["build", "spawn"]',
+            'Command_Categories:',
+            '  analyze→improve: "Use found issues as targets + priority ranking"',
+            '  build→test: "Focus on changed modules + integration points"',
+            
+            -- Edge cases with quotes and special characters
+            'Planning: "@see flag-inheritance.yml#Universal_Always"',
+            'MCP_Control: "@see flag-inheritance.yml#MCP_Control"',
+            'Thinking_Modes: "@see flag-inheritance.yml#Thinking_Modes"',
+        }
+        assert_all_eq(real_yaml_lines, nil)
+    end)
 end)
 
 describe("cron_from_line.cron_from_line - Valid cron:", function()
@@ -257,6 +318,38 @@ describe("cron_from_line.cron_from_line - Valid cron:", function()
             ["cron: '* * * * MON#3'"] = "* * * * MON#3",
             ["cron: '23 12 * * SUN#2'"] = "23 12 * * SUN#2",
             ["cron: '0 00 10 ? * MON-THU,SUN *'"] = "0 00 10 ? * MON-THU,SUN *",
+        }
+        for inp, exp in pairs(items) do
+            eq(cron_from_line(inp), exp)
+        end
+    end)
+
+    it("extract special cron expressions", function()
+        local items = {
+            -- Double quoted special expressions
+            ['"@yearly"'] = "@yearly",
+            ['"@annually"'] = "@annually",
+            ['"@monthly"'] = "@monthly",
+            ['"@weekly"'] = "@weekly",
+            ['"@daily"'] = "@daily",
+            ['"@midnight"'] = "@midnight",
+            ['"@hourly"'] = "@hourly",
+            ['"@reboot"'] = "@reboot",
+            
+            -- Single quoted special expressions
+            ["'@yearly'"] = "@yearly",
+            ["'@annually'"] = "@annually",
+            ["'@monthly'"] = "@monthly",
+            ["'@weekly'"] = "@weekly",
+            ["'@daily'"] = "@daily",
+            ["'@midnight'"] = "@midnight",
+            ["'@hourly'"] = "@hourly",
+            ["'@reboot'"] = "@reboot",
+            
+            -- Embedded in lines
+            ['cron: "@daily"'] = "@daily",
+            ["schedule: '@hourly'"] = "@hourly",
+            ['task: "@reboot"'] = "@reboot",
         }
         for inp, exp in pairs(items) do
             eq(cron_from_line(inp), exp)

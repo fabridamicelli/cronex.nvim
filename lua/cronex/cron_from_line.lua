@@ -56,11 +56,61 @@ local get_cron_for_pat = function(line, pat)
     return clean
 end
 
+-- Valid cron letter patterns
+local valid_cron_words = {
+    -- Month names
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+    -- Day names
+    "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT",
+    -- Special characters
+    "L", "W", "LW", "WL", -- L=last, W=weekday
+}
+
+local is_valid_cron_text = function(text)
+    -- Remove all valid cron words/letters and see if any other text remains
+    local temp = text:upper()
+    
+    -- Remove valid cron words
+    for _, word in ipairs(valid_cron_words) do
+        temp = temp:gsub(word, "")
+    end
+    
+    -- Remove numbers, special chars, and whitespace
+    temp = temp:gsub("[%d%-%/%*,%?#%s]+", "")
+    
+    -- If anything remains, it's probably not a cron expression
+    return temp == ""
+end
+
+-- Valid special cron expressions
+local valid_special_expressions = {
+    ["@yearly"] = true,
+    ["@annually"] = true,
+    ["@monthly"] = true,
+    ["@weekly"] = true,
+    ["@daily"] = true,
+    ["@midnight"] = true,
+    ["@hourly"] = true,
+    ["@reboot"] = true,
+}
+
 M.cron_from_line = function(line)
+    -- First check for special expressions like @daily, @reboot, etc.
+    local special = line:match("['\"]%s?(@[%w%-]+)%s?['\"]")
+    if special and valid_special_expressions[special] then
+        return special
+    end
+    
+    -- Then check standard cron patterns
     for n = 7, 5, -1 do
         local pat = nparts2pat[n]
         local match = get_cron_for_pat(line, pat)
         if match then
+            -- Validate that any text in the expression is valid cron syntax
+            if not is_valid_cron_text(match) then
+                return nil
+            end
             return match
         end
     end
