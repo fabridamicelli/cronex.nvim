@@ -182,7 +182,7 @@ M.cron_from_line_crontab = function(line)
 
     -- Check for special time strings
     local special = line:match(special_pattern)
-    if special then
+    if special and valid_special_expressions[special] then
         return special
     end
 

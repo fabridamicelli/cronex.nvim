@@ -8,6 +8,18 @@ describe("cron_from_line_crontab", function()
         assert.is_nil(cron_from_line_crontab("  "))
     end)
 
+    it("Filters out invalid special expressions like @include", function()
+        -- These should be filtered out to prevent cronstrue errors
+        assert.is_nil(cron_from_line_crontab("@include universal-constants.yml#Universal_Legend"))
+        assert.is_nil(cron_from_line_crontab("@include flag-inheritance.yml#Universal_Always"))
+        assert.is_nil(cron_from_line_crontab("@see recovery-state-patterns.yml#Error_Classification"))
+        
+        -- Valid special expressions should still work (when followed by command)
+        assert.are.equal("@daily", cron_from_line_crontab("@daily /path/to/script"))
+        assert.are.equal("@hourly", cron_from_line_crontab("@hourly run command"))
+        assert.are.equal("@reboot", cron_from_line_crontab("@reboot startup script"))
+    end)
+
     it("Handles quoted cron expressions", function()
         -- Should defer to the standard cron_from_line function
         assert.are.equal("* * * * *", cron_from_line_crontab("'* * * * *' echo hello"))
