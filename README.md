@@ -147,7 +147,7 @@ require('cronex').setup{
 EOF
 ```
 
-Look [here](/examples) for more config examples.
+Look [here](/examples) for more config examples, including support for `crontab`.
 
 ### Extractor
 Logic of the default extractor can be found here in `/cronex/cron_from_line.lua`.  
@@ -363,14 +363,10 @@ I haven't seen use-cases where it makes sense to have more than one, but I'd be 
 - If encountering problems with an expression, disable the format in order to see the exact output coming from the explainer
 
 ## TODO
-- add stylua linter
 - make screencast gif
 - Accept diagnostics config? (nvim 0.11)
-- add command timeout
-- ci: new version only nvim >0.10
-- add config example with custom diagnostic prefix
-
 - config notification symbol?
+- add config example with custom diagnostic prefix
 - ripgrep extraction?
 - add proper docs
-- test call in CI
+- Docs: Table with supported formats
