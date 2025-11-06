@@ -30,6 +30,12 @@ The default is [cronstrue](https://www.npmjs.com/package/cronstrue), which is th
 
 [Install the `cronstrue` library](https://www.npmjs.com/package/cronstrue) and make sure that the command `cronstrue` is available in the environment where your buffer is being shown.
 
+[Mason](https://github.com/mason-org/mason.nvim) users can alternatively install `cronstrue` from the [mason registry](https://mason-registry.dev/registry/list#cronstrue) with `:MasonInstall cronstrue` or by adding it to the `ensure_installed` list:
+
+```lua
+require("mason-tool-installer").setup({ ensure_installed = { "cronstrue" } })
+```
+
 That will use the `cronstrue` library under the hood to generate the explanations.
 
 ### Installation
